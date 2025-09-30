@@ -1,21 +1,34 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { createClient } from '@supabase/supabase-js';
-import { User, AuthState } from '../types/user';
-import { projectId, publicAnonKey } from '../utils/supabase/info';
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
+import { jwtDecode } from "jwt-decode";
+import { userApiClient } from "../api/apiClient";
+import { User } from "../types/user";
+
+interface DecodedToken {
+  "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier": string;
+  sub: string;
+}
+
+interface AuthState {
+  user: User | null;
+  isLoading: boolean;
+  error: string | null;
+}
 
 interface AuthContextType extends AuthState {
-  login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string, name: string, phone?: string) => Promise<void>;
-  logout: () => Promise<void>;
+  login: (userName: string, password: string) => Promise<void>;
+  register: (userData: any) => Promise<void>;
+  logout: () => void;
   updateProfile: (updates: Partial<User>) => Promise<void>;
+  clearError: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
-
-const supabase = createClient(
-  `https://${projectId}.supabase.co`,
-  publicAnonKey
-);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [state, setState] = useState<AuthState>({
@@ -25,171 +38,110 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   });
 
   useEffect(() => {
-    // Check for existing session
     const checkSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) {
-          console.error('Session check error:', error);
-          setState(prev => ({ ...prev, isLoading: false, error: error.message }));
-          return;
-        }
+      const token = localStorage.getItem("jwt_token");
+      if (token) {
+        try {
+          const decodedToken: DecodedToken = jwtDecode(token);
+          const userId =
+            decodedToken[
+              "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
+            ];
 
-        if (session?.user) {
-          const userData: User = {
-            id: session.user.id,
-            email: session.user.email!,
-            name: session.user.user_metadata?.name || session.user.email!.split('@')[0],
-            phone: session.user.user_metadata?.phone,
-            avatar: session.user.user_metadata?.avatar,
-            createdAt: session.user.created_at,
-          };
-          setState({ user: userData, isLoading: false, error: null });
-        } else {
+          userApiClient.defaults.headers.common[
+            "Authorization"
+          ] = `Bearer ${token}`;
+          const response = await userApiClient.get(`/users/${userId}`);
+          setState({ user: response.data, isLoading: false, error: null });
+        } catch (error) {
+          console.error("Session check failed, token is invalid.", error);
+          localStorage.removeItem("jwt_token");
           setState({ user: null, isLoading: false, error: null });
         }
-      } catch (error) {
-        console.error('Session check failed:', error);
-        setState({ user: null, isLoading: false, error: 'Failed to check session' });
+      } else {
+        setState({ user: null, isLoading: false, error: null });
       }
     };
-
     checkSession();
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (session?.user) {
-          const userData: User = {
-            id: session.user.id,
-            email: session.user.email!,
-            name: session.user.user_metadata?.name || session.user.email!.split('@')[0],
-            phone: session.user.user_metadata?.phone,
-            avatar: session.user.user_metadata?.avatar,
-            createdAt: session.user.created_at,
-          };
-          setState({ user: userData, isLoading: false, error: null });
-        } else {
-          setState({ user: null, isLoading: false, error: null });
-        }
-      }
-    );
-
-    return () => subscription.unsubscribe();
   }, []);
 
-  const login = async (email: string, password: string) => {
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
-    
+  // NEW: A function to explicitly clear the error state.
+  const clearError = () => {
+    setState((prev) => ({ ...prev, error: null }));
+  };
+
+  const login = async (loginIdentifier: string, password: string) => {
+    clearError(); // Clear previous errors on a new attempt
+    setState((prev) => ({ ...prev, isLoading: true }));
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
+      const response = await userApiClient.post("/auth/login", {
+        loginIdentifier,
         password,
       });
+      const { token, user } = response.data;
 
-      if (error) {
-        throw error;
-      }
+      localStorage.setItem("jwt_token", token);
+      userApiClient.defaults.headers.common[
+        "Authorization"
+      ] = `Bearer ${token}`;
+
+      setState({ user, isLoading: false, error: null });
     } catch (error: any) {
-      console.error('Login error:', error);
-      setState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error: error.message || 'Login failed' 
-      }));
-      throw error;
+      console.error("Login error:", error);
+      const errorMessage = error.response?.data || "Invalid credentials";
+      setState((prev) => ({ ...prev, isLoading: false, error: errorMessage }));
+      // Re-throw the error so the form component can catch it and show a toast
+      throw new Error(errorMessage);
     }
   };
 
-  const register = async (email: string, password: string, name: string, phone?: string) => {
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
-    
+  const register = async (registerData: any) => {
+    clearError(); // Clear previous errors on a new attempt
+    setState((prev) => ({ ...prev, isLoading: true }));
     try {
-      // Call server endpoint for registration
-      const response = await fetch(`https://${projectId}.supabase.co/functions/v1/make-server-c602aa03/auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${publicAnonKey}`,
-        },
-        body: JSON.stringify({ email, password, name, phone }),
-      });
+      const response = await userApiClient.post("/auth/register", registerData);
+      const { token, user } = response.data;
 
-      if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(errorData || 'Registration failed');
-      }
+      localStorage.setItem("jwt_token", token);
+      userApiClient.defaults.headers.common[
+        "Authorization"
+      ] = `Bearer ${token}`;
 
-      // Then sign in the user
-      await login(email, password);
+      setState({ user, isLoading: false, error: null });
     } catch (error: any) {
-      console.error('Registration error:', error);
-      setState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error: error.message || 'Registration failed' 
-      }));
-      throw error;
+      console.error("Registration error:", error);
+      const errorMessage =
+        error.response?.data || "An unknown registration error occurred.";
+      setState((prev) => ({ ...prev, isLoading: false, error: errorMessage }));
+      // Re-throw the error so the form component can catch it
+      throw new Error(errorMessage);
     }
   };
 
-  const logout = async () => {
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
-    
-    try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
-    } catch (error: any) {
-      console.error('Logout error:', error);
-      setState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error: error.message || 'Logout failed' 
-      }));
-    }
+  const logout = () => {
+    localStorage.removeItem("jwt_token");
+    delete userApiClient.defaults.headers.common["Authorization"];
+    setState({ user: null, isLoading: false, error: null });
   };
 
   const updateProfile = async (updates: Partial<User>) => {
     if (!state.user) return;
-    
-    setState(prev => ({ ...prev, isLoading: true, error: null }));
-    
     try {
-      const { error } = await supabase.auth.updateUser({
-        data: {
-          name: updates.name,
-          phone: updates.phone,
-          avatar: updates.avatar,
-        }
-      });
-
-      if (error) throw error;
-
-      setState(prev => ({
-        ...prev,
-        user: prev.user ? { ...prev.user, ...updates } : null,
-        isLoading: false,
-      }));
-    } catch (error: any) {
-      console.error('Profile update error:', error);
-      setState(prev => ({ 
-        ...prev, 
-        isLoading: false, 
-        error: error.message || 'Profile update failed' 
-      }));
+      const response = await userApiClient.put(
+        `/users/${state.user.id}`,
+        updates
+      );
+      setState((prev) => ({ ...prev, user: response.data, isLoading: false }));
+    } catch (error) {
+      console.error("Profile update error:", error);
       throw error;
     }
   };
 
   return (
-    <AuthContext.Provider value={{
-      ...state,
-      login,
-      register,
-      logout,
-      updateProfile,
-    }}>
+    <AuthContext.Provider
+      value={{ ...state, login, register, logout, updateProfile, clearError }}
+    >
       {children}
     </AuthContext.Provider>
   );
@@ -198,7 +150,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    throw new Error("useAuth must be used within an AuthProvider");
   }
   return context;
 }

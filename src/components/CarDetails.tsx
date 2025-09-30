@@ -4,19 +4,19 @@ import { Button } from "./ui/button";
 import { Badge } from "./ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
-import { 
-  ArrowLeft, 
-  Calendar, 
-  Fuel, 
-  Gauge, 
-  Settings, 
-  MapPin, 
+import {
+  ArrowLeft,
+  Calendar,
+  Fuel,
+  Gauge,
+  Settings,
+  MapPin,
   Heart,
   Phone,
   Mail,
   MessageCircle,
   Check,
-  Star
+  Star,
 } from "lucide-react";
 import { Input } from "./ui/input";
 import { Label } from "./ui/label";
@@ -31,49 +31,56 @@ interface CarDetailsProps {
   isFavorite?: boolean;
 }
 
-export function CarDetails({ car, onBack, onToggleFavorite, isFavorite }: CarDetailsProps) {
+export function CarDetails({
+  car,
+  onBack,
+  onToggleFavorite,
+  isFavorite,
+}: CarDetailsProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [showContactForm, setShowContactForm] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
     email: "",
-    message: ""
+    message: "",
   });
-  
+
   const { submitInquiry, isSubmitting } = useInquiries();
 
   const formatPrice = (price: number) => {
-    return '$' + new Intl.NumberFormat('en-US').format(price);
+    return "$" + new Intl.NumberFormat("en-US").format(price);
   };
 
   const formatMileage = (mileage: number) => {
-    if (mileage === 0) return 'New car';
-    return new Intl.NumberFormat('en-US').format(mileage) + ' mi';
+    if (mileage === 0) return "New car";
+    return new Intl.NumberFormat("en-US").format(mileage) + " mi";
   };
 
   const handleSubmitInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     const inquiry = {
       carId: car.id,
       name: formData.name,
       phone: formData.phone,
       email: formData.email,
-      message: formData.message || `Interested in ${car.brand} ${car.model} ${car.year}`
+      message:
+        formData.message ||
+        `Interested in ${car.brand} ${car.model} ${car.year}`,
     };
-    
+
     const result = await submitInquiry(inquiry);
-    
+
     if (result.success) {
-      toast.success('Inquiry submitted!', {
-        description: 'We will contact you soon.'
+      toast.success("Inquiry submitted!", {
+        description: "We will contact you soon.",
       });
       setShowContactForm(false);
       setFormData({ name: "", phone: "", email: "", message: "" });
     } else {
-      toast.error('Failed to submit inquiry', {
-        description: 'Please try again or contact us by phone.'
+      toast.error("Failed to submit inquiry", {
+        description: "Please try again or contact us by phone.",
       });
     }
   };
@@ -83,23 +90,27 @@ export function CarDetails({ car, onBack, onToggleFavorite, isFavorite }: CarDet
       {/* Header */}
       <div className="bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <Button 
-            variant="ghost" 
+          <Button
+            variant="ghost"
             onClick={onBack}
             className="flex items-center gap-2"
           >
             <ArrowLeft className="h-4 w-4" />
             Back to Catalog
           </Button>
-          
+
           {onToggleFavorite && (
             <Button
               variant={isFavorite ? "default" : "outline"}
               onClick={() => onToggleFavorite(car.id)}
               className="ml-4"
             >
-              <Heart className={`h-4 w-4 ${isFavorite ? 'fill-red-500 text-red-500' : ''}`} />
-              {isFavorite ? 'In Favorites' : 'Add to Favorites'}
+              <Heart
+                className={`h-4 w-4 ${
+                  isFavorite ? "fill-red-500 text-red-500" : ""
+                }`}
+              />
+              {isFavorite ? "In Favorites" : "Add to Favorites"}
             </Button>
           )}
         </div>
@@ -126,7 +137,9 @@ export function CarDetails({ car, onBack, onToggleFavorite, isFavorite }: CarDet
                     key={index}
                     onClick={() => setSelectedImage(index)}
                     className={`aspect-[4/3] rounded-lg overflow-hidden border-2 transition-colors ${
-                      selectedImage === index ? 'border-blue-500' : 'border-gray-200'
+                      selectedImage === index
+                        ? "border-blue-500"
+                        : "border-gray-200"
                     }`}
                   >
                     <ImageWithFallback
@@ -162,7 +175,9 @@ export function CarDetails({ car, onBack, onToggleFavorite, isFavorite }: CarDet
                 <CardTitle>Description</CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-gray-600 leading-relaxed">{car.description}</p>
+                <p className="text-gray-600 leading-relaxed">
+                  {car.description}
+                </p>
               </CardContent>
             </Card>
           </div>
@@ -218,9 +233,15 @@ export function CarDetails({ car, onBack, onToggleFavorite, isFavorite }: CarDet
                 </div>
 
                 <div className="pt-3 border-t space-y-2">
-                  <div><strong>Body Type:</strong> {car.bodyType}</div>
-                  <div><strong>Color:</strong> {car.color}</div>
-                  <div><strong>Engine:</strong> {car.engineVolume}L, {car.power} HP</div>
+                  <div>
+                    <strong>Body Type:</strong> {car.bodyType}
+                  </div>
+                  <div>
+                    <strong>Color:</strong> {car.color}
+                  </div>
+                  <div>
+                    <strong>Engine:</strong> {car.engineVolume}L, {car.power} HP
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -247,7 +268,7 @@ export function CarDetails({ car, onBack, onToggleFavorite, isFavorite }: CarDet
                   <CardTitle>Contact Us</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button 
+                  <Button
                     className="w-full"
                     onClick={() => setShowContactForm(true)}
                   >
@@ -256,7 +277,7 @@ export function CarDetails({ car, onBack, onToggleFavorite, isFavorite }: CarDet
                   </Button>
                   <Button variant="outline" className="w-full">
                     <Phone className="h-4 w-4 mr-2" />
-                    +1 (800) 123-45-67
+                    +48 (800) 123-45-67
                   </Button>
                 </CardContent>
               </Card>
@@ -273,7 +294,9 @@ export function CarDetails({ car, onBack, onToggleFavorite, isFavorite }: CarDet
                         id="name"
                         required
                         value={formData.name}
-                        onChange={(e) => setFormData({...formData, name: e.target.value})}
+                        onChange={(e) =>
+                          setFormData({ ...formData, name: e.target.value })
+                        }
                       />
                     </div>
                     <div>
@@ -283,7 +306,9 @@ export function CarDetails({ car, onBack, onToggleFavorite, isFavorite }: CarDet
                         type="tel"
                         required
                         value={formData.phone}
-                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                        onChange={(e) =>
+                          setFormData({ ...formData, phone: e.target.value })
+                        }
                       />
                     </div>
                     <div>
@@ -293,7 +318,9 @@ export function CarDetails({ car, onBack, onToggleFavorite, isFavorite }: CarDet
                         type="email"
                         required
                         value={formData.email}
-                        onChange={(e) => setFormData({...formData, email: e.target.value})}
+                        onChange={(e) =>
+                          setFormData({ ...formData, email: e.target.value })
+                        }
                       />
                     </div>
                     <div>
@@ -302,16 +329,22 @@ export function CarDetails({ car, onBack, onToggleFavorite, isFavorite }: CarDet
                         id="message"
                         placeholder="I'm interested in this car..."
                         value={formData.message}
-                        onChange={(e) => setFormData({...formData, message: e.target.value})}
+                        onChange={(e) =>
+                          setFormData({ ...formData, message: e.target.value })
+                        }
                       />
                     </div>
                     <div className="flex gap-2">
-                      <Button type="submit" disabled={isSubmitting} className="flex-1">
-                        {isSubmitting ? 'Sending...' : 'Send Inquiry'}
+                      <Button
+                        type="submit"
+                        disabled={isSubmitting}
+                        className="flex-1"
+                      >
+                        {isSubmitting ? "Sending..." : "Send Inquiry"}
                       </Button>
-                      <Button 
-                        type="button" 
-                        variant="outline" 
+                      <Button
+                        type="button"
+                        variant="outline"
                         onClick={() => setShowContactForm(false)}
                       >
                         Cancel

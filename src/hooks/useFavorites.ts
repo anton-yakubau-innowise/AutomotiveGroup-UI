@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import { storage } from '../utils/localStorage';
+import { useState, useEffect } from "react";
+import { storage } from "../utils/localStorage";
 
 export function useFavorites() {
   const [favorites, setFavorites] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(true);
 
-  const FAVORITES_KEY = 'user_favorites';
+  const FAVORITES_KEY = "user_favorites";
 
   useEffect(() => {
     loadFavorites();
@@ -13,14 +13,14 @@ export function useFavorites() {
 
   const loadFavorites = () => {
     try {
-      console.log('Загрузка избранного из localStorage...');
+      console.log("Loading Favorites from localStorage...");
       const savedFavorites = storage.get<string[]>(FAVORITES_KEY);
       if (savedFavorites && Array.isArray(savedFavorites)) {
         setFavorites(new Set(savedFavorites));
-        console.log('Избранное загружено:', savedFavorites);
+        console.log("Favorites loaded:", savedFavorites);
       }
     } catch (error) {
-      console.error('Ошибка загрузки избранного:', error);
+      console.error("Error loading favorites:", error);
     } finally {
       setIsLoading(false);
     }
@@ -29,7 +29,7 @@ export function useFavorites() {
   const saveFavorites = (newFavorites: Set<string>) => {
     const favoritesArray = Array.from(newFavorites);
     storage.set(FAVORITES_KEY, favoritesArray);
-    console.log('Избранное сохранено:', favoritesArray);
+    console.log("Favorites saved:", favoritesArray);
   };
 
   const toggleFavorite = (carId: string) => {
@@ -49,6 +49,6 @@ export function useFavorites() {
     favorites: Array.from(favorites),
     isLoading,
     toggleFavorite,
-    isFavorite
+    isFavorite,
   };
 }

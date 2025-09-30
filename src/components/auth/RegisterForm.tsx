@@ -1,111 +1,177 @@
-import { useState } from 'react';
-import { Button } from '../ui/button';
-import { Input } from '../ui/input';
-import { Label } from '../ui/label';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../ui/card';
-import { useAuth } from '../../contexts/AuthContext';
-import { Eye, EyeOff, Loader2 } from 'lucide-react';
-import { toast } from 'sonner@2.0.3';
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
+import { Label } from "../ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { useAuth } from "../../contexts/AuthContext";
+import { Eye, EyeOff, Loader2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface RegisterFormProps {
   onToggleForm: () => void;
   onClose: () => void;
 }
 
-export function RegisterForm({ onToggleForm, onClose }: RegisterFormProps) {
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    password: '',
-    confirmPassword: '',
+// Validation schema updated with optional phoneNumber
+const registerSchema = z
+  .object({
+    userName: z
+      .string()
+      .min(3, { message: "Username must be at least 3 characters long." })
+      .regex(/^[a-zA-Z0-9_.-]+$/, {
+        message: "Username can only contain letters, numbers, and _ . -",
+      }),
+    email: z.string().email({ message: "Please enter a valid email address." }),
+    firstName: z.string().min(1, { message: "First name is required." }),
+    lastName: z.string().min(1, { message: "Last name is required." }),
+    phoneNumber: z.string().optional(), // Phone number is optional
+    password: z
+      .string()
+      .min(6, { message: "Password must be at least 6 characters long." }),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match.",
+    path: ["confirmPassword"], // Show error on the confirm password field
   });
+
+type RegisterFormData = z.infer<typeof registerSchema>;
+
+export function RegisterForm({ onToggleForm, onClose }: RegisterFormProps) {
   const [showPassword, setShowPassword] = useState(false);
-  const { register, isLoading } = useAuth();
+  const { register: registerUser, isLoading, error } = useAuth();
 
-  const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      userName: "",
+      email: "",
+      firstName: "",
+      lastName: "",
+      phoneNumber: "", // Added to default values
+      password: "",
+      confirmPassword: "",
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!formData.name || !formData.email || !formData.password) {
-      toast.error('Please fill in all required fields');
-      return;
-    }
-
-    if (formData.password !== formData.confirmPassword) {
-      toast.error('Passwords do not match');
-      return;
-    }
-
-    if (formData.password.length < 6) {
-      toast.error('Password must be at least 6 characters long');
-      return;
-    }
-
+  const onSubmit = async (data: RegisterFormData) => {
     try {
-      await register(formData.email, formData.password, formData.name, formData.phone);
-      toast.success('Account created successfully!');
+      await registerUser(data);
+      toast.success("Account created successfully!");
       onClose();
-    } catch (error) {
-      toast.error('Registration failed. Please try again.');
+    } catch (err) {
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Registration failed. Please try again.";
+
+      toast.error(errorMessage);
     }
   };
 
   return (
     <Card className="w-full max-w-md mx-auto">
       <CardHeader>
-        <CardTitle>Create Account</CardTitle>
         <CardDescription>
           Join us to save favorites and track your inquiries
         </CardDescription>
       </CardHeader>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Full Name *</Label>
-            <Input
-              id="name"
-              type="text"
-              placeholder="Enter your full name"
-              value={formData.name}
-              onChange={(e) => handleChange('name', e.target.value)}
-              required
-            />
+          {/* Using two separate fields for name */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="firstName">First Name</Label>
+              <Input
+                id="firstName"
+                placeholder="John"
+                {...register("firstName")}
+              />
+              {errors.firstName && (
+                <p className="text-sm text-red-500">
+                  {errors.firstName.message}
+                </p>
+              )}
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="lastName">Last Name</Label>
+              <Input
+                id="lastName"
+                placeholder="Doe"
+                {...register("lastName")}
+              />
+              {errors.lastName && (
+                <p className="text-sm text-red-500">
+                  {errors.lastName.message}
+                </p>
+              )}
+            </div>
           </div>
+
           <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
+            <Label htmlFor="userName">Username</Label>
+            <Input
+              id="userName"
+              placeholder="johndoe"
+              {...register("userName")}
+            />
+            {errors.userName && (
+              <p className="text-sm text-red-500">{errors.userName.message}</p>
+            )}
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
-              placeholder="Enter your email"
-              value={formData.email}
-              onChange={(e) => handleChange('email', e.target.value)}
-              required
+              placeholder="m@example.com"
+              {...register("email")}
             />
+            {errors.email && (
+              <p className="text-sm text-red-500">{errors.email.message}</p>
+            )}
           </div>
+
+          {/* Phone number field added here */}
           <div className="space-y-2">
-            <Label htmlFor="phone">Phone Number</Label>
+            <Label htmlFor="phoneNumber">Phone Number (Optional)</Label>
             <Input
-              id="phone"
+              id="phoneNumber"
               type="tel"
-              placeholder="Enter your phone number"
-              value={formData.phone}
-              onChange={(e) => handleChange('phone', e.target.value)}
+              placeholder="+1 234 567 890"
+              {...register("phoneNumber")}
             />
+            {errors.phoneNumber && (
+              <p className="text-sm text-red-500">
+                {errors.phoneNumber.message}
+              </p>
+            )}
           </div>
+
           <div className="space-y-2">
-            <Label htmlFor="password">Password *</Label>
+            <Label htmlFor="password">Password</Label>
             <div className="relative">
               <Input
                 id="password"
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Create a password (min. 6 characters)"
-                value={formData.password}
-                onChange={(e) => handleChange('password', e.target.value)}
-                required
+                type={showPassword ? "text" : "password"}
+                placeholder="Create a password"
+                {...register("password")}
               />
               <Button
                 type="button"
@@ -121,20 +187,28 @@ export function RegisterForm({ onToggleForm, onClose }: RegisterFormProps) {
                 )}
               </Button>
             </div>
+            {errors.password && (
+              <p className="text-sm text-red-500">{errors.password.message}</p>
+            )}
           </div>
+
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">Confirm Password *</Label>
+            <Label htmlFor="confirmPassword">Confirm Password</Label>
             <Input
               id="confirmPassword"
               type="password"
               placeholder="Confirm your password"
-              value={formData.confirmPassword}
-              onChange={(e) => handleChange('confirmPassword', e.target.value)}
-              required
+              {...register("confirmPassword")}
             />
+            {errors.confirmPassword && (
+              <p className="text-sm text-red-500">
+                {errors.confirmPassword.message}
+              </p>
+            )}
           </div>
+          {error && <p className="text-sm text-red-500">{error}</p>}
         </CardContent>
-        <CardFooter className="flex flex-col space-y-4">
+        <CardFooter className="flex flex-col space-y-4 mt-6">
           <Button type="submit" className="w-full" disabled={isLoading}>
             {isLoading ? (
               <>
@@ -142,11 +216,13 @@ export function RegisterForm({ onToggleForm, onClose }: RegisterFormProps) {
                 Creating Account...
               </>
             ) : (
-              'Create Account'
+              "Create Account"
             )}
           </Button>
           <div className="text-center text-sm">
-            <span className="text-muted-foreground">Already have an account? </span>
+            <span className="text-muted-foreground">
+              Already have an account?{" "}
+            </span>
             <Button
               type="button"
               variant="link"

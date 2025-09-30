@@ -1,28 +1,69 @@
-import { useState } from 'react';
-import { Dialog, DialogContent, DialogTitle } from '../ui/dialog';
-import { LoginForm } from './LoginForm';
-import { RegisterForm } from './RegisterForm';
+import { useEffect, useState } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "../ui/dialog";
+import { LoginForm } from "./LoginForm";
+import { RegisterForm } from "./RegisterForm";
+import { useAuth } from "../../contexts/AuthContext"; // Import useAuth to get access to its functions
 
 interface AuthModalProps {
   isOpen: boolean;
   onClose: () => void;
-  defaultForm?: 'login' | 'register';
+  defaultForm?: "login" | "register";
 }
 
-export function AuthModal({ isOpen, onClose, defaultForm = 'login' }: AuthModalProps) {
-  const [currentForm, setCurrentForm] = useState<'login' | 'register'>(defaultForm);
+export function AuthModal({
+  isOpen,
+  onClose,
+  defaultForm = "login",
+}: AuthModalProps) {
+  const [currentForm, setCurrentForm] = useState<"login" | "register">(
+    defaultForm
+  );
+  const { clearError } = useAuth(); // Get the clearError function from our context
 
+  // This hook ensures the form always opens in the correct state
+  useEffect(() => {
+    if (isOpen) {
+      setCurrentForm(defaultForm);
+    }
+  }, [isOpen, defaultForm]);
+
+  // This function is called when the user clicks the "Sign up" or "Sign in" link
   const handleToggleForm = () => {
-    setCurrentForm(currentForm === 'login' ? 'register' : 'login');
+    clearError(); // Clear any existing errors when switching forms
+    setCurrentForm(currentForm === "login" ? "register" : "login");
+  };
+
+  // This function is called when the dialog's open state changes (e.g., user clicks the 'X' or outside)
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      // If the modal is closing...
+      clearError(); // ...clear any lingering errors from the context...
+      onClose(); // ...and then call the original onClose handler.
+    }
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    // Use our new handler for the onOpenChange event
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
-        <DialogTitle className="sr-only">
-          {currentForm === 'login' ? 'Sign In' : 'Create Account'}
-        </DialogTitle>
-        {currentForm === 'login' ? (
+        <DialogHeader>
+          <DialogTitle className="text-2xl font-bold text-center">
+            {currentForm === "login" ? "Sign In" : "Create Account"}
+          </DialogTitle>
+          <DialogDescription className="sr-only">
+            {currentForm === "login"
+              ? "Enter your credentials to sign in to your account."
+              : "Fill out the form to create a new account."}
+          </DialogDescription>
+        </DialogHeader>
+
+        {currentForm === "login" ? (
           <LoginForm onToggleForm={handleToggleForm} onClose={onClose} />
         ) : (
           <RegisterForm onToggleForm={handleToggleForm} onClose={onClose} />

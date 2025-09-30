@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { storage } from '../utils/localStorage';
+import { useState } from "react";
+import { storage } from "../utils/localStorage";
 
 export interface CarInquiry {
   id: string;
@@ -11,34 +11,37 @@ export interface CarInquiry {
   email?: string;
   message?: string;
   timestamp: string;
-  status: 'new' | 'contacted' | 'closed';
+  status: "new" | "contacted" | "closed";
 }
 
 export function useInquiries() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const INQUIRIES_KEY = 'car_inquiries';
+  const INQUIRIES_KEY = "car_inquiries";
 
-  const submitInquiry = async (inquiry: Omit<CarInquiry, 'id' | 'timestamp' | 'status'>) => {
+  const submitInquiry = async (
+    inquiry: Omit<CarInquiry, "id" | "timestamp" | "status">
+  ) => {
     setIsSubmitting(true);
     try {
       const inquiryData: CarInquiry = {
         ...inquiry,
-        id: crypto?.randomUUID?.() || Math.random().toString(36).substring(2, 15),
+        id:
+          crypto?.randomUUID?.() || Math.random().toString(36).substring(2, 15),
         timestamp: new Date().toISOString(),
-        status: 'new'
+        status: "new",
       };
 
-      // Сохраняем в localStorage
+      // Save to localStorage
       const existingInquiries = getStoredInquiries();
       const updatedInquiries = [inquiryData, ...existingInquiries];
-      
+
       storage.set(INQUIRIES_KEY, updatedInquiries);
-      
-      console.log('Заявка сохранена:', inquiryData);
+
+      console.log("Inquiry submitted:", inquiryData);
       return { success: true, inquiryId: inquiryData.id };
     } catch (error) {
-      console.error('Ошибка отправки заявки:', error);
+      console.error("Error submitting inquiry:", error);
       return { success: false, error };
     } finally {
       setIsSubmitting(false);
@@ -57,6 +60,6 @@ export function useInquiries() {
   return {
     submitInquiry,
     getInquiries,
-    isSubmitting
+    isSubmitting,
   };
 }
