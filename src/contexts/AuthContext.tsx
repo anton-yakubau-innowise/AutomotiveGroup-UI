@@ -6,7 +6,7 @@ import {
   ReactNode,
 } from "react";
 import { jwtDecode } from "jwt-decode";
-import { userApiClient } from "../api/apiClient";
+import apiClient from "../api/apiClient";
 import { User } from "../types/user";
 
 interface DecodedToken {
@@ -48,10 +48,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier"
             ];
 
-          userApiClient.defaults.headers.common[
+          apiClient.defaults.headers.common[
             "Authorization"
           ] = `Bearer ${token}`;
-          const response = await userApiClient.get(`/users/${userId}`);
+          const response = await apiClient.get(`/users/users/${userId}`);
           setState({ user: response.data, isLoading: false, error: null });
         } catch (error) {
           console.error("Session check failed, token is invalid.", error);
@@ -74,16 +74,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearError(); // Clear previous errors on a new attempt
     setState((prev) => ({ ...prev, isLoading: true }));
     try {
-      const response = await userApiClient.post("/auth/login", {
+      const response = await apiClient.post("/users/auth/login", {
         loginIdentifier,
         password,
       });
       const { token, user } = response.data;
 
       localStorage.setItem("jwt_token", token);
-      userApiClient.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer ${token}`;
+      apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
       setState({ user, isLoading: false, error: null });
     } catch (error: any) {
@@ -99,13 +97,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearError(); // Clear previous errors on a new attempt
     setState((prev) => ({ ...prev, isLoading: true }));
     try {
-      const response = await userApiClient.post("/auth/register", registerData);
+      const response = await apiClient.post(
+        "/users/auth/register",
+        registerData
+      );
       const { token, user } = response.data;
 
       localStorage.setItem("jwt_token", token);
-      userApiClient.defaults.headers.common[
-        "Authorization"
-      ] = `Bearer ${token}`;
+      apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
       setState({ user, isLoading: false, error: null });
     } catch (error: any) {
@@ -120,15 +119,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     localStorage.removeItem("jwt_token");
-    delete userApiClient.defaults.headers.common["Authorization"];
+    delete apiClient.defaults.headers.common["Authorization"];
     setState({ user: null, isLoading: false, error: null });
   };
 
   const updateProfile = async (updates: Partial<User>) => {
     if (!state.user) return;
     try {
-      const response = await userApiClient.put(
-        `/users/${state.user.id}`,
+      const response = await apiClient.put(
+        `/users/users/${state.user.id}`,
         updates
       );
       setState((prev) => ({ ...prev, user: response.data, isLoading: false }));

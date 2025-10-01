@@ -22,7 +22,7 @@ import { Input } from "./ui/input";
 import { Label } from "./ui/label";
 import { Textarea } from "./ui/textarea";
 import { useInquiries } from "../hooks/useInquiries";
-import { toast } from "sonner@2.0.3";
+import { toast } from "sonner";
 
 interface CarDetailsProps {
   car: Car;
@@ -70,7 +70,7 @@ export function CarDetails({
         `Interested in ${car.brand} ${car.model} ${car.year}`,
     };
 
-    const result = await submitInquiry(inquiry);
+    const result = await submitInquiry(inqusiry);
 
     if (result.success) {
       toast.success("Inquiry submitted!", {
