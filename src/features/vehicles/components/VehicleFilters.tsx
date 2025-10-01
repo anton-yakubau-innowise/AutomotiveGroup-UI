@@ -1,34 +1,65 @@
 import { useState } from "react";
-import { Button } from "./ui/button";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { CarFilters as CarFiltersType } from "../types/car";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { VehicleFilters as VehicleFiltersType } from "@/features/vehicles/types";
 import { SlidersHorizontal, X } from "lucide-react";
 
-interface CarFiltersProps {
-  filters: CarFiltersType;
-  onFiltersChange: (filters: CarFiltersType) => void;
+interface VehicleFiltersProps {
+  filters: VehicleFiltersType;
+  onFiltersChange: (filters: VehicleFiltersType) => void;
   onClearFilters: () => void;
 }
 
-export function CarFilters({ filters, onFiltersChange, onClearFilters }: CarFiltersProps) {
+export function VehicleFilters({
+  filters,
+  onFiltersChange,
+  onClearFilters,
+}: VehicleFiltersProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const brands = ["BMW", "Mercedes-Benz", "Audi", "Toyota", "Volkswagen", "Lexus", "Volvo"];
+  const brands = [
+    "BMW",
+    "Mercedes-Benz",
+    "Audi",
+    "Toyota",
+    "Volkswagen",
+    "Lexus",
+    "Volvo",
+  ];
   const fuelTypes = ["Gasoline", "Diesel", "Electric", "Hybrid"];
   const transmissions = ["Automatic", "Manual", "CVT"];
-  const bodyTypes = ["Sedan", "Hatchback", "Wagon", "Crossover", "SUV", "Coupe", "Convertible"];
+  const bodyTypes = [
+    "Sedan",
+    "Hatchback",
+    "Wagon",
+    "Crossover",
+    "SUV",
+    "Coupe",
+    "Convertible",
+  ];
 
-  const updateFilter = (key: keyof CarFiltersType, value: string | number | undefined) => {
+  const updateFilter = (
+    key: keyof VehicleFiltersType,
+    value: string | number | undefined
+  ) => {
     onFiltersChange({
       ...filters,
-      [key]: value === "" ? undefined : value
+      [key]: value === "" ? undefined : value,
     });
   };
 
-  const hasActiveFilters = Object.values(filters).some(value => value !== undefined);
+  const hasActiveFilters = Object.values(filters).some(
+    (value) => value !== undefined
+  );
 
   return (
     <div className="space-y-4">
@@ -51,13 +82,18 @@ export function CarFilters({ filters, onFiltersChange, onClearFilters }: CarFilt
       </div>
 
       {/* Filters Panel */}
-      <div className={`${isOpen ? 'block' : 'hidden'} lg:block`}>
+      <div className={`${isOpen ? "block" : "hidden"} lg:block`}>
         <Card>
           <CardHeader className="pb-4">
             <div className="flex items-center justify-between">
               <CardTitle>Search Filters</CardTitle>
               {hasActiveFilters && (
-                <Button variant="ghost" size="sm" onClick={onClearFilters} className="hidden lg:flex">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onClearFilters}
+                  className="hidden lg:flex"
+                >
                   <X className="h-4 w-4 mr-1" />
                   Clear
                 </Button>
@@ -68,7 +104,12 @@ export function CarFilters({ filters, onFiltersChange, onClearFilters }: CarFilt
             {/* Brand */}
             <div>
               <Label>Brand</Label>
-              <Select value={filters.brand || ""} onValueChange={(value) => updateFilter("brand", value)}>
+              <Select
+                value={filters.manufacturer || ""}
+                onValueChange={(value: string) =>
+                  updateFilter("manufacturer", value)
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select brand" />
                 </SelectTrigger>
@@ -90,7 +131,12 @@ export function CarFilters({ filters, onFiltersChange, onClearFilters }: CarFilt
                   type="number"
                   placeholder="From"
                   value={filters.priceFrom || ""}
-                  onChange={(e) => updateFilter("priceFrom", e.target.value ? Number(e.target.value) : undefined)}
+                  onChange={(e) =>
+                    updateFilter(
+                      "priceFrom",
+                      e.target.value ? Number(e.target.value) : undefined
+                    )
+                  }
                 />
               </div>
               <div>
@@ -99,7 +145,12 @@ export function CarFilters({ filters, onFiltersChange, onClearFilters }: CarFilt
                   type="number"
                   placeholder="To"
                   value={filters.priceTo || ""}
-                  onChange={(e) => updateFilter("priceTo", e.target.value ? Number(e.target.value) : undefined)}
+                  onChange={(e) =>
+                    updateFilter(
+                      "priceTo",
+                      e.target.value ? Number(e.target.value) : undefined
+                    )
+                  }
                 />
               </div>
             </div>
@@ -112,7 +163,12 @@ export function CarFilters({ filters, onFiltersChange, onClearFilters }: CarFilt
                   type="number"
                   placeholder="2015"
                   value={filters.yearFrom || ""}
-                  onChange={(e) => updateFilter("yearFrom", e.target.value ? Number(e.target.value) : undefined)}
+                  onChange={(e) =>
+                    updateFilter(
+                      "yearFrom",
+                      e.target.value ? Number(e.target.value) : undefined
+                    )
+                  }
                 />
               </div>
               <div>
@@ -121,7 +177,12 @@ export function CarFilters({ filters, onFiltersChange, onClearFilters }: CarFilt
                   type="number"
                   placeholder="2024"
                   value={filters.yearTo || ""}
-                  onChange={(e) => updateFilter("yearTo", e.target.value ? Number(e.target.value) : undefined)}
+                  onChange={(e) =>
+                    updateFilter(
+                      "yearTo",
+                      e.target.value ? Number(e.target.value) : undefined
+                    )
+                  }
                 />
               </div>
             </div>
@@ -129,7 +190,12 @@ export function CarFilters({ filters, onFiltersChange, onClearFilters }: CarFilt
             {/* Fuel Type */}
             <div>
               <Label>Fuel Type</Label>
-              <Select value={filters.fuelType || ""} onValueChange={(value) => updateFilter("fuelType", value)}>
+              <Select
+                value={filters.engineType || ""}
+                onValueChange={(value: string) =>
+                  updateFilter("engineType", value)
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select fuel type" />
                 </SelectTrigger>
@@ -146,7 +212,12 @@ export function CarFilters({ filters, onFiltersChange, onClearFilters }: CarFilt
             {/* Transmission */}
             <div>
               <Label>Transmission</Label>
-              <Select value={filters.transmission || ""} onValueChange={(value) => updateFilter("transmission", value)}>
+              <Select
+                value={filters.transmissionType || ""}
+                onValueChange={(value: string) =>
+                  updateFilter("transmissionType", value)
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select transmission" />
                 </SelectTrigger>
@@ -163,7 +234,12 @@ export function CarFilters({ filters, onFiltersChange, onClearFilters }: CarFilt
             {/* Body Type */}
             <div>
               <Label>Body Type</Label>
-              <Select value={filters.bodyType || ""} onValueChange={(value) => updateFilter("bodyType", value)}>
+              <Select
+                value={filters.bodyType || ""}
+                onValueChange={(value: string) =>
+                  updateFilter("bodyType", value)
+                }
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select body type" />
                 </SelectTrigger>
@@ -185,7 +261,12 @@ export function CarFilters({ filters, onFiltersChange, onClearFilters }: CarFilt
                   type="number"
                   placeholder="0"
                   value={filters.mileageFrom || ""}
-                  onChange={(e) => updateFilter("mileageFrom", e.target.value ? Number(e.target.value) : undefined)}
+                  onChange={(e) =>
+                    updateFilter(
+                      "mileageFrom",
+                      e.target.value ? Number(e.target.value) : undefined
+                    )
+                  }
                 />
               </div>
               <div>
@@ -194,7 +275,12 @@ export function CarFilters({ filters, onFiltersChange, onClearFilters }: CarFilt
                   type="number"
                   placeholder="100000"
                   value={filters.mileageTo || ""}
-                  onChange={(e) => updateFilter("mileageTo", e.target.value ? Number(e.target.value) : undefined)}
+                  onChange={(e) =>
+                    updateFilter(
+                      "mileageTo",
+                      e.target.value ? Number(e.target.value) : undefined
+                    )
+                  }
                 />
               </div>
             </div>

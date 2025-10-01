@@ -1,30 +1,30 @@
 import { useState } from "react";
 import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
-import { CarCatalog } from "./components/CarCatalog";
-import { CarDetails } from "./components/CarDetails";
+import { VehicleCatalog } from "./features/vehicles/components/VehicleCatalog";
+import { VehicleDetails } from "./features/vehicles/components/VehicleDetails";
 import { InquiriesPanel } from "./components/InquiriesPanel";
 import { FavoritesPanel } from "./components/FavoritesPanel";
 import { UserDashboard } from "./components/UserDashboard";
 import { mockCars } from "./data/mockCars";
-import { Car } from "./types/car";
+import { Vehicle } from "./features/vehicles/types";
 import { useFavorites } from "./hooks/useFavorites";
 import { Toaster } from "./components/ui/sonner";
 
-type AppView = "catalog" | "car-details" | "dashboard";
+type AppView = "catalog" | "vehicle-details" | "dashboard";
 
 export default function App() {
   const [currentView, setCurrentView] = useState<AppView>("catalog");
-  const [selectedCar, setSelectedCar] = useState<Car | null>(null);
+  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
   const { toggleFavorite, isFavorite } = useFavorites();
 
-  const handleViewDetails = (car: Car) => {
-    setSelectedCar(car);
-    setCurrentView("car-details");
+  const handleViewDetails = (vehicle: Vehicle) => {
+    setSelectedVehicle(vehicle);
+    setCurrentView("vehicle-details");
   };
 
   const handleBackToCatalog = () => {
-    setSelectedCar(null);
+    setSelectedVehicle(null);
     setCurrentView("catalog");
   };
 
@@ -38,13 +38,13 @@ export default function App() {
 
   const renderCurrentView = () => {
     switch (currentView) {
-      case "car-details":
-        return selectedCar ? (
-          <CarDetails
-            car={selectedCar}
+      case "vehicle-details":
+        return selectedVehicle ? (
+          <VehicleDetails
+            vehicle={selectedVehicle}
             onBack={handleBackToCatalog}
             onToggleFavorite={toggleFavorite}
-            isFavorite={isFavorite(selectedCar.id)}
+            isFavorite={isFavorite(selectedVehicle.id)}
           />
         ) : null;
 
@@ -61,8 +61,11 @@ export default function App() {
         return (
           <>
             <Hero />
-            <CarCatalog cars={mockCars} onViewDetails={handleViewDetails} />
-            <FavoritesPanel cars={mockCars} onViewDetails={handleViewDetails} />
+            <VehicleCatalog onViewDetails={handleViewDetails} />
+            <FavoritesPanel
+              vehicles={mockCars}
+              onViewDetails={handleViewDetails}
+            />
           </>
         );
     }

@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Car } from "../types/car";
-import { Button } from "./ui/button";
-import { Badge } from "./ui/badge";
-import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { ImageWithFallback } from "./figma/ImageWithFallback";
+import { Vehicle } from "@/features/vehicles/types";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
 import {
   ArrowLeft,
   Calendar,
@@ -16,27 +16,26 @@ import {
   Mail,
   MessageCircle,
   Check,
-  Star,
 } from "lucide-react";
-import { Input } from "./ui/input";
-import { Label } from "./ui/label";
-import { Textarea } from "./ui/textarea";
-import { useInquiries } from "../hooks/useInquiries";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { useInquiries } from "@/hooks/useInquiries";
 import { toast } from "sonner";
 
-interface CarDetailsProps {
-  car: Car;
+interface VehicleDetailsProps {
+  vehicle: Vehicle;
   onBack: () => void;
-  onToggleFavorite?: (carId: string) => void;
+  onToggleFavorite?: (vehicleId: string) => void;
   isFavorite?: boolean;
 }
 
-export function CarDetails({
-  car,
+export function VehicleDetails({
+  vehicle,
   onBack,
   onToggleFavorite,
   isFavorite,
-}: CarDetailsProps) {
+}: VehicleDetailsProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [showContactForm, setShowContactForm] = useState(false);
   const [formData, setFormData] = useState({
@@ -57,21 +56,40 @@ export function CarDetails({
     return new Intl.NumberFormat("en-US").format(mileage) + " mi";
   };
 
+  const getStatusBadge = () => {
+    switch (vehicle.status) {
+      case "Available":
+        if (vehicle.mileage === 0) {
+          return (
+            <Badge className="bg-green-500 hover:bg-green-600 text-white">
+              New
+            </Badge>
+          );
+        }
+        return null;
+      case "Reserved":
+        return <Badge variant="secondary">Reserved</Badge>;
+      case "Sold":
+        return <Badge variant="destructive">Sold</Badge>;
+      default:
+        return null;
+    }
+  };
+
   const handleSubmitInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
-
     const inquiry = {
-      carId: car.id,
+      vehicleId: vehicle.id,
+      vehicleBrand: vehicle.manufacturer,
+      vehicleModel: vehicle.model,
       name: formData.name,
       phone: formData.phone,
       email: formData.email,
       message:
         formData.message ||
-        `Interested in ${car.brand} ${car.model} ${car.year}`,
+        `Interested in ${vehicle.manufacturer} ${vehicle.model} ${vehicle.year}`,
     };
-
-    const result = await submitInquiry(inqusiry);
-
+    const result = await submitInquiry(inquiry);
     if (result.success) {
       toast.success("Inquiry submitted!", {
         description: "We will contact you soon.",
@@ -87,9 +105,8 @@ export function CarDetails({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <Button
             variant="ghost"
             onClick={onBack}
@@ -98,15 +115,14 @@ export function CarDetails({
             <ArrowLeft className="h-4 w-4" />
             Back to Catalog
           </Button>
-
           {onToggleFavorite && (
             <Button
-              variant={isFavorite ? "default" : "outline"}
-              onClick={() => onToggleFavorite(car.id)}
-              className="ml-4"
+              variant="outline"
+              size="sm"
+              onClick={() => onToggleFavorite(vehicle.id)}
             >
               <Heart
-                className={`h-4 w-4 ${
+                className={`h-4 w-4 mr-2 ${
                   isFavorite ? "fill-red-500 text-red-500" : ""
                 }`}
               />
@@ -118,144 +134,75 @@ export function CarDetails({
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid lg:grid-cols-3 gap-8">
-          {/* Left Column - Images and Gallery */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Main Image */}
             <div className="aspect-[16/9] rounded-xl overflow-hidden bg-white shadow-sm">
               <ImageWithFallback
-                src={car.images[selectedImage] || car.images[0]}
-                alt={`${car.brand} ${car.model}`}
+                src={vehicle.imageUrl}
+                alt={`${vehicle.manufacturer} ${vehicle.model}`}
                 className="w-full h-full object-cover"
               />
             </div>
 
-            {/* Image Thumbnails */}
-            {car.images.length > 1 && (
-              <div className="grid grid-cols-4 gap-2">
-                {car.images.map((image, index) => (
-                  <button
-                    key={index}
-                    onClick={() => setSelectedImage(index)}
-                    className={`aspect-[4/3] rounded-lg overflow-hidden border-2 transition-colors ${
-                      selectedImage === index
-                        ? "border-blue-500"
-                        : "border-gray-200"
-                    }`}
-                  >
-                    <ImageWithFallback
-                      src={image}
-                      alt={`${car.brand} ${car.model} ${index + 1}`}
-                      className="w-full h-full object-cover"
-                    />
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Features */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Features</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-3">
-                  {car.features.map((feature, index) => (
-                    <div key={index} className="flex items-center gap-2">
-                      <Check className="h-4 w-4 text-green-500" />
-                      <span className="text-sm">{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Description */}
             <Card>
               <CardHeader>
                 <CardTitle>Description</CardTitle>
               </CardHeader>
               <CardContent>
                 <p className="text-gray-600 leading-relaxed">
-                  {car.description}
+                  {vehicle.description}
                 </p>
               </CardContent>
             </Card>
           </div>
 
-          {/* Right Column - Car Info and Actions */}
           <div className="space-y-6">
-            {/* Car Header */}
             <Card>
               <CardContent className="p-6">
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h1 className="text-2xl font-bold text-gray-900">
-                      {car.brand} {car.model}
+                      {vehicle.manufacturer} {vehicle.model}
                     </h1>
                     <div className="text-3xl font-bold text-blue-600 mt-2">
-                      {formatPrice(car.price)}
+                      {formatPrice(vehicle.basePriceAmount)}
                     </div>
                   </div>
-                  <div className="flex gap-2">
-                    {car.isNew && (
-                      <Badge className="bg-green-500 hover:bg-green-600 text-white">
-                        New
-                      </Badge>
-                    )}
-                    {car.isReserved && (
-                      <Badge variant="secondary">Reserved</Badge>
-                    )}
-                  </div>
+                  <div className="flex gap-2">{getStatusBadge()}</div>
                 </div>
 
-                {/* Key Specs */}
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
                       <Calendar className="h-4 w-4 text-gray-400" />
-                      <span>{car.year}</span>
+                      <span>{vehicle.year}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Gauge className="h-4 w-4 text-gray-400" />
-                      <span>{formatMileage(car.mileage)}</span>
+                      <span>{formatMileage(vehicle.mileage)}</span>
                     </div>
                   </div>
                   <div className="space-y-3">
                     <div className="flex items-center gap-2">
                       <Fuel className="h-4 w-4 text-gray-400" />
-                      <span>{car.fuelType}</span>
+                      <span>{vehicle.engineType}</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Settings className="h-4 w-4 text-gray-400" />
-                      <span>{car.transmission}</span>
+                      <span>{vehicle.transmissionType}</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="pt-3 border-t space-y-2">
+                <div className="pt-4 border-t space-y-2 text-sm text-gray-700">
                   <div>
-                    <strong>Body Type:</strong> {car.bodyType}
+                    <strong>Body Type:</strong> {vehicle.bodyType}
                   </div>
                   <div>
-                    <strong>Color:</strong> {car.color}
+                    <strong>Color:</strong> {vehicle.color}
                   </div>
                   <div>
-                    <strong>Engine:</strong> {car.engineVolume}L, {car.power} HP
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Showroom Info */}
-            <Card>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-3 mb-3">
-                  <MapPin className="h-5 w-5 text-gray-400" />
-                  <div>
-                    <div className="font-semibold">{car.showroomName}</div>
-                    <div className="text-sm text-gray-600">
-                      Showroom rating: 4.9/5
-                    </div>
+                    <strong>Engine:</strong> {vehicle.engineVolume}L,{" "}
+                    {vehicle.power} HP
                   </div>
                 </div>
               </CardContent>

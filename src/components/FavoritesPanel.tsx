@@ -1,27 +1,36 @@
 import { useState, useMemo } from "react";
 import { useFavorites } from "../hooks/useFavorites";
-import { Car } from "../types/car";
-import { CarCard } from "./CarCard";
+import { Vehicle } from "@/features/vehicles/types";
+import { VehicleCard } from "@/features/vehicles/components/VehicleCard";
 import { Button } from "./ui/button";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from "./ui/sheet";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "./ui/sheet";
 import { Heart, X } from "lucide-react";
 
 interface FavoritesPanelProps {
-  cars: Car[];
-  onViewDetails: (car: Car) => void;
+  vehicles: Vehicle[];
+  onViewDetails: (vehicle: Vehicle) => void;
 }
 
-export function FavoritesPanel({ cars, onViewDetails }: FavoritesPanelProps) {
+export function FavoritesPanel({
+  vehicles,
+  onViewDetails,
+}: FavoritesPanelProps) {
   const { favorites, toggleFavorite, isFavorite } = useFavorites();
   const [isOpen, setIsOpen] = useState(false);
 
-  const favoriteCars = useMemo(() => {
-    return cars.filter(car => isFavorite(car.id));
-  }, [cars, favorites]);
+  const favoriteVehicles = useMemo(() => {
+    return vehicles.filter((vehicle) => isFavorite(vehicle.id));
+  }, [vehicles, favorites]);
 
-  const handleViewDetails = (car: Car) => {
+  const handleViewDetails = (vehicle: Vehicle) => {
     setIsOpen(false);
-    onViewDetails(car);
+    onViewDetails(vehicle);
   };
 
   return (
@@ -29,25 +38,21 @@ export function FavoritesPanel({ cars, onViewDetails }: FavoritesPanelProps) {
       <SheetTrigger asChild>
         <Button variant="outline" className="fixed bottom-4 left-4 z-50">
           <Heart className="h-4 w-4 mr-2" />
-          Favorites ({favoriteCars.length})
+          Favorites ({favoriteVehicles.length})
         </Button>
       </SheetTrigger>
       <SheetContent side="left" className="w-full sm:max-w-lg overflow-y-auto">
         <SheetHeader>
           <div className="flex items-center justify-between">
             <SheetTitle>Favorite Cars</SheetTitle>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsOpen(false)}
-            >
+            <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>
               <X className="h-4 w-4" />
             </Button>
           </div>
         </SheetHeader>
-        
+
         <div className="mt-6">
-          {favoriteCars.length === 0 ? (
+          {favoriteVehicles.length === 0 ? (
             <div className="text-center py-8 text-gray-500">
               <Heart className="h-12 w-12 mx-auto mb-4 opacity-50" />
               <p>No favorite cars yet</p>
@@ -57,10 +62,10 @@ export function FavoritesPanel({ cars, onViewDetails }: FavoritesPanelProps) {
             </div>
           ) : (
             <div className="space-y-4">
-              {favoriteCars.map((car) => (
-                <CarCard
-                  key={car.id}
-                  car={car}
+              {favoriteVehicles.map((vehicle) => (
+                <VehicleCard
+                  key={vehicle.id}
+                  vehicle={vehicle}
                   onViewDetails={handleViewDetails}
                   onToggleFavorite={toggleFavorite}
                   isFavorite={true}

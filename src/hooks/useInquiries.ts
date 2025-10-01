@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { storage } from "../utils/localStorage";
 
-export interface CarInquiry {
+export interface VehicleInquiry {
   id: string;
-  carId: string;
-  carBrand: string;
-  carModel: string;
+  vehicleId: string;
+  vehicleBrand: string;
+  vehicleModel: string;
   name: string;
   phone: string;
   email?: string;
@@ -20,11 +20,11 @@ export function useInquiries() {
   const INQUIRIES_KEY = "car_inquiries";
 
   const submitInquiry = async (
-    inquiry: Omit<CarInquiry, "id" | "timestamp" | "status">
+    inquiry: Omit<VehicleInquiry, "id" | "timestamp" | "status">
   ) => {
     setIsSubmitting(true);
     try {
-      const inquiryData: CarInquiry = {
+      const inquiryData: VehicleInquiry = {
         ...inquiry,
         id:
           crypto?.randomUUID?.() || Math.random().toString(36).substring(2, 15),
@@ -48,12 +48,12 @@ export function useInquiries() {
     }
   };
 
-  const getStoredInquiries = (): CarInquiry[] => {
-    const stored = storage.get<CarInquiry[]>(INQUIRIES_KEY);
+  const getStoredInquiries = (): VehicleInquiry[] => {
+    const stored = storage.get<VehicleInquiry[]>(INQUIRIES_KEY);
     return stored && Array.isArray(stored) ? stored : [];
   };
 
-  const getInquiries = (): CarInquiry[] => {
+  const getInquiries = (): VehicleInquiry[] => {
     return getStoredInquiries();
   };
 
