@@ -8,7 +8,7 @@ import {
 } from "../ui/dialog";
 import { LoginForm } from "./LoginForm";
 import { RegisterForm } from "./RegisterForm";
-import { useAuth } from "../../contexts/AuthContext"; // Import useAuth to get access to its functions
+import { useAuth } from "../../contexts/AuthContext";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -24,7 +24,7 @@ export function AuthModal({
   const [currentForm, setCurrentForm] = useState<"login" | "register">(
     defaultForm
   );
-  const { clearError } = useAuth(); // Get the clearError function from our context
+  const { clearError } = useAuth();
 
   // This hook ensures the form always opens in the correct state
   useEffect(() => {
@@ -35,16 +35,15 @@ export function AuthModal({
 
   // This function is called when the user clicks the "Sign up" or "Sign in" link
   const handleToggleForm = () => {
-    clearError(); // Clear any existing errors when switching forms
+    clearError();
     setCurrentForm(currentForm === "login" ? "register" : "login");
   };
 
   // This function is called when the dialog's open state changes (e.g., user clicks the 'X' or outside)
   const handleOpenChange = (open: boolean) => {
     if (!open) {
-      // If the modal is closing...
-      clearError(); // ...clear any lingering errors from the context...
-      onClose(); // ...and then call the original onClose handler.
+      clearError();
+      onClose();
     }
   };
 

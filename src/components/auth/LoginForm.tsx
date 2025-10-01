@@ -24,7 +24,6 @@ interface LoginFormProps {
 }
 
 // Step 1: Define the validation schema with Zod
-// This is the "contract" that specifies what data we expect from the form.
 const loginSchema = z.object({
   loginIdentifier: z
     .string()
@@ -32,7 +31,6 @@ const loginSchema = z.object({
   password: z.string().min(1, { message: "Password is required" }),
 });
 
-// Infer the TypeScript type from the Zod schema
 type LoginFormData = z.infer<typeof loginSchema>;
 
 export function LoginForm({ onToggleForm, onClose }: LoginFormProps) {
@@ -46,7 +44,6 @@ export function LoginForm({ onToggleForm, onClose }: LoginFormProps) {
     formState: { errors },
   } = useForm<LoginFormData>({
     resolver: zodResolver(loginSchema),
-    // FIX: Add defaultValues to ensure form fields are initialized as strings, not undefined.
     defaultValues: {
       loginIdentifier: "",
       password: "",
@@ -55,14 +52,9 @@ export function LoginForm({ onToggleForm, onClose }: LoginFormProps) {
 
   // Step 3: Create a handler that receives only valid data
   const onSubmit = async (data: LoginFormData) => {
-    // --- DIAGNOSTIC LOGGING ---
-    // Let's see what data react-hook-form is giving us.
-    // Check your browser's developer console for this message.
     console.log("Data received by onSubmit:", JSON.stringify(data));
 
     try {
-      // --- EXTRA SAFEGUARD ---
-      // This check should be redundant because of Zod, but let's add it for debugging.
       if (
         typeof data.loginIdentifier !== "string" ||
         typeof data.password !== "string"
@@ -75,8 +67,6 @@ export function LoginForm({ onToggleForm, onClose }: LoginFormProps) {
         return;
       }
 
-      // `data` is an object that has already been validated
-      // and contains { loginIdentifier: "...", password: "..." }
       await login(data.loginIdentifier, data.password);
       toast.success("Successfully logged in!");
       onClose();
@@ -109,7 +99,6 @@ export function LoginForm({ onToggleForm, onClose }: LoginFormProps) {
               placeholder="Enter your username or email"
               {...register("loginIdentifier")}
             />
-            {/* Display validation error if it exists */}
             {errors.loginIdentifier && (
               <p className="text-sm text-red-500">
                 {errors.loginIdentifier.message}

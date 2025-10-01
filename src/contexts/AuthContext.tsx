@@ -65,13 +65,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     checkSession();
   }, []);
 
-  // NEW: A function to explicitly clear the error state.
   const clearError = () => {
     setState((prev) => ({ ...prev, error: null }));
   };
 
   const login = async (loginIdentifier: string, password: string) => {
-    clearError(); // Clear previous errors on a new attempt
+    clearError();
     setState((prev) => ({ ...prev, isLoading: true }));
     try {
       const response = await apiClient.post("/users/auth/login", {
@@ -88,13 +87,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       console.error("Login error:", error);
       const errorMessage = error.response?.data || "Invalid credentials";
       setState((prev) => ({ ...prev, isLoading: false, error: errorMessage }));
-      // Re-throw the error so the form component can catch it and show a toast
       throw new Error(errorMessage);
     }
   };
 
   const register = async (registerData: any) => {
-    clearError(); // Clear previous errors on a new attempt
+    clearError();
     setState((prev) => ({ ...prev, isLoading: true }));
     try {
       const response = await apiClient.post(
@@ -112,7 +110,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const errorMessage =
         error.response?.data || "An unknown registration error occurred.";
       setState((prev) => ({ ...prev, isLoading: false, error: errorMessage }));
-      // Re-throw the error so the form component can catch it
       throw new Error(errorMessage);
     }
   };

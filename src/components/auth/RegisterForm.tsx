@@ -35,7 +35,7 @@ const registerSchema = z
     email: z.string().email({ message: "Please enter a valid email address." }),
     firstName: z.string().min(1, { message: "First name is required." }),
     lastName: z.string().min(1, { message: "Last name is required." }),
-    phoneNumber: z.string().optional(), // Phone number is optional
+    phoneNumber: z.string().optional(),
     password: z
       .string()
       .min(6, { message: "Password must be at least 6 characters long." }),
@@ -43,7 +43,7 @@ const registerSchema = z
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match.",
-    path: ["confirmPassword"], // Show error on the confirm password field
+    path: ["confirmPassword"],
   });
 
 type RegisterFormData = z.infer<typeof registerSchema>;
@@ -63,7 +63,7 @@ export function RegisterForm({ onToggleForm, onClose }: RegisterFormProps) {
       email: "",
       firstName: "",
       lastName: "",
-      phoneNumber: "", // Added to default values
+      phoneNumber: "",
       password: "",
       confirmPassword: "",
     },
