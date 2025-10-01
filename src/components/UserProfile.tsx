@@ -23,7 +23,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { toast } from "sonner";
-import { User } from "@/types/user";
+import { User } from "@/features/users/types";
 
 // Step 1: Define a validation schema for the profile update form
 const profileUpdateSchema = z.object({

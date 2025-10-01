@@ -7,7 +7,14 @@ import {
 } from "react";
 import { jwtDecode } from "jwt-decode";
 import apiClient from "../api/apiClient";
-import { User } from "../types/user";
+import { User } from "@/features/users/types";
+import {
+  loginUser,
+  registerUser,
+  getUserProfile,
+  updateUserProfile,
+  RegisterData,
+} from "@/features/users/api";
 
 interface DecodedToken {
   "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier": string;
@@ -21,8 +28,8 @@ interface AuthState {
 }
 
 interface AuthContextType extends AuthState {
-  login: (userName: string, password: string) => Promise<void>;
-  register: (userData: any) => Promise<void>;
+  login: (loginIdentifier: string, password: string) => Promise<void>;
+  register: (userData: RegisterData) => Promise<void>;
   logout: () => void;
   updateProfile: (updates: Partial<User>) => Promise<void>;
   clearError: () => void;
@@ -51,11 +58,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           apiClient.defaults.headers.common[
             "Authorization"
           ] = `Bearer ${token}`;
-          const response = await apiClient.get(`/users/users/${userId}`);
-          setState({ user: response.data, isLoading: false, error: null });
+
+          const userProfile = await getUserProfile(userId);
+          setState({ user: userProfile, isLoading: false, error: null });
         } catch (error) {
           console.error("Session check failed, token is invalid.", error);
           localStorage.removeItem("jwt_token");
+          delete apiClient.defaults.headers.common["Authorization"];
           setState({ user: null, isLoading: false, error: null });
         }
       } else {
@@ -73,11 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearError();
     setState((prev) => ({ ...prev, isLoading: true }));
     try {
-      const response = await apiClient.post("/users/auth/login", {
-        loginIdentifier,
-        password,
-      });
-      const { token, user } = response.data;
+      const { token, user } = await loginUser({ loginIdentifier, password });
 
       localStorage.setItem("jwt_token", token);
       apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
@@ -85,21 +90,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setState({ user, isLoading: false, error: null });
     } catch (error: any) {
       console.error("Login error:", error);
-      const errorMessage = error.response?.data || "Invalid credentials";
+      const errorMessage =
+        error.response?.data?.message ||
+        error.response?.data ||
+        "Invalid credentials";
       setState((prev) => ({ ...prev, isLoading: false, error: errorMessage }));
       throw new Error(errorMessage);
     }
   };
 
-  const register = async (registerData: any) => {
+  const register = async (registerData: RegisterData) => {
     clearError();
     setState((prev) => ({ ...prev, isLoading: true }));
     try {
-      const response = await apiClient.post(
-        "/users/auth/register",
-        registerData
-      );
-      const { token, user } = response.data;
+      const { token, user } = await registerUser(registerData);
 
       localStorage.setItem("jwt_token", token);
       apiClient.defaults.headers.common["Authorization"] = `Bearer ${token}`;
@@ -108,7 +112,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error: any) {
       console.error("Registration error:", error);
       const errorMessage =
-        error.response?.data || "An unknown registration error occurred.";
+        error.response?.data?.message ||
+        error.response?.data ||
+        "An unknown registration error occurred.";
       setState((prev) => ({ ...prev, isLoading: false, error: errorMessage }));
       throw new Error(errorMessage);
     }
@@ -123,11 +129,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const updateProfile = async (updates: Partial<User>) => {
     if (!state.user) return;
     try {
-      const response = await apiClient.put(
-        `/users/users/${state.user.id}`,
-        updates
-      );
-      setState((prev) => ({ ...prev, user: response.data, isLoading: false }));
+      const updatedUser = await updateUserProfile(state.user.id, updates);
+      setState((prev) => ({ ...prev, user: updatedUser }));
     } catch (error) {
       console.error("Profile update error:", error);
       throw error;

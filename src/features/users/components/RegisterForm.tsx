@@ -3,9 +3,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 
-import { Button } from "../ui/button";
-import { Input } from "../ui/input";
-import { Label } from "../ui/label";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Card,
   CardContent,
@@ -13,8 +13,8 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "../ui/card";
-import { useAuth } from "../../contexts/AuthContext";
+} from "@/components/ui/card";
+import { useAuth } from "@/contexts/AuthContext";
 import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -23,7 +23,6 @@ interface RegisterFormProps {
   onClose: () => void;
 }
 
-// Validation schema updated with optional phoneNumber
 const registerSchema = z
   .object({
     userName: z
@@ -32,7 +31,7 @@ const registerSchema = z
       .regex(/^[a-zA-Z0-9_.-]+$/, {
         message: "Username can only contain letters, numbers, and _ . -",
       }),
-    email: z.string().email({ message: "Please enter a valid email address." }),
+    email: z.email({ message: "Please enter a valid email address." }),
     firstName: z.string().min(1, { message: "First name is required." }),
     lastName: z.string().min(1, { message: "Last name is required." }),
     phoneNumber: z.string().optional(),

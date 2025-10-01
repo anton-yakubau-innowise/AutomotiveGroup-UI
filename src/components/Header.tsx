@@ -19,7 +19,7 @@ import {
   LayoutDashboard,
 } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
-import { AuthModal } from "./auth/AuthModal";
+import { AuthModal } from "@/features/users/components/AuthModal";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
 import { UserProfile } from "./UserProfile";
 
