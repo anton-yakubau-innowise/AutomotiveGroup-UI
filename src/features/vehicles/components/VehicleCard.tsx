@@ -18,13 +18,16 @@ export function VehicleCard({
   onToggleFavorite,
   isFavorite,
 }: VehicleCardProps) {
+  const primaryPhoto =
+    vehicle.photos?.find((p) => p.isPrimary) || vehicle.photos?.[0];
+
   const formatPrice = (price: number) => {
     return "$" + new Intl.NumberFormat("en-US").format(price);
   };
 
   const formatMileage = (mileage: number) => {
     if (mileage === 0) return "New";
-    return new Intl.NumberFormat("en-US").format(mileage) + " mi";
+    return new Intl.NumberFormat("en-US").format(mileage) + " km";
   };
 
   const getStatusBadge = () => {
@@ -52,7 +55,7 @@ export function VehicleCard({
       <div className="relative">
         <div className="aspect-[4/3] overflow-hidden rounded-t-lg">
           <ImageWithFallback
-            src={vehicle.imageUrl}
+            src={primaryPhoto?.photoUrl}
             alt={`${vehicle.manufacturer} ${vehicle.model}`}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
           />
@@ -110,9 +113,6 @@ export function VehicleCard({
             <Settings className="h-4 w-4" />
             <span>{vehicle.transmissionType}</span>{" "}
           </div>
-        </div>
-        <div className="text-sm text-gray-600 pt-3 border-t">
-          Engine: {vehicle.engineVolume}L &bull; {vehicle.power} HP
         </div>
       </CardContent>
 

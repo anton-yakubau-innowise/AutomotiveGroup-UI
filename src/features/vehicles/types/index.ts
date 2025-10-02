@@ -15,6 +15,7 @@ export interface Vehicle {
   vin: string;
   manufacturer: string;
   model: string;
+  package: string;
   year: number;
   mileage: number;
   color: string;
@@ -31,9 +32,17 @@ export interface Vehicle {
 
   status: VehicleStatus;
 
-  imageUrl: string;
+  photos: VehiclePhoto[];
 
   features: string[];
+}
+
+export interface VehiclePhoto {
+  id: string;
+  photoUrl: string;
+  description?: string;
+  isPrimary: boolean;
+  displayOrder: number;
 }
 
 export interface VehicleFilters {

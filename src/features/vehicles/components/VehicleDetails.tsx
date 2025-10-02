@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Vehicle } from "@/features/vehicles/types";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -10,10 +10,8 @@ import {
   Fuel,
   Gauge,
   Settings,
-  MapPin,
   Heart,
   Phone,
-  Mail,
   MessageCircle,
   Check,
 } from "lucide-react";
@@ -22,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useInquiries } from "@/hooks/useInquiries";
 import { toast } from "sonner";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface VehicleDetailsProps {
   vehicle: Vehicle;
@@ -36,12 +35,25 @@ export function VehicleDetails({
   onToggleFavorite,
   isFavorite,
 }: VehicleDetailsProps) {
-  const [selectedImage, setSelectedImage] = useState(0);
+  const initialPhotoIndex = useMemo(() => {
+    if (!vehicle.photos || vehicle.photos.length === 0) return 0;
+    const primaryIndex = vehicle.photos.findIndex((p) => p.isPrimary);
+    return primaryIndex !== -1 ? primaryIndex : 0;
+  }, [vehicle.photos]);
+
+  const [selectedImageIndex, setSelectedImageIndex] =
+    useState(initialPhotoIndex);
+
+  const selectedPhoto =
+    vehicle.photos?.[selectedImageIndex] || vehicle.photos?.[0];
+
   const [showContactForm, setShowContactForm] = useState(false);
+  const { user } = useAuth();
+
   const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    email: "",
+    name: user ? `${user.firstName} ${user.lastName}` : "",
+    phone: user?.phoneNumber || "",
+    email: user?.email || "",
     message: "",
   });
 
@@ -53,19 +65,19 @@ export function VehicleDetails({
 
   const formatMileage = (mileage: number) => {
     if (mileage === 0) return "New car";
-    return new Intl.NumberFormat("en-US").format(mileage) + " mi";
+    return new Intl.NumberFormat("en-US").format(mileage) + " km";
   };
 
   const getStatusBadge = () => {
+    if (vehicle.status === "Available" && vehicle.mileage === 0) {
+      return (
+        <Badge className="bg-green-500 hover:bg-green-600 text-white">
+          New
+        </Badge>
+      );
+    }
     switch (vehicle.status) {
       case "Available":
-        if (vehicle.mileage === 0) {
-          return (
-            <Badge className="bg-green-500 hover:bg-green-600 text-white">
-              New
-            </Badge>
-          );
-        }
         return null;
       case "Reserved":
         return <Badge variant="secondary">Reserved</Badge>;
@@ -95,7 +107,7 @@ export function VehicleDetails({
         description: "We will contact you soon.",
       });
       setShowContactForm(false);
-      setFormData({ name: "", phone: "", email: "", message: "" });
+      setFormData((prev) => ({ ...prev, message: "" }));
     } else {
       toast.error("Failed to submit inquiry", {
         description: "Please try again or contact us by phone.",
@@ -105,7 +117,7 @@ export function VehicleDetails({
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="bg-white border-b">
+      <div className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
           <Button
             variant="ghost"
@@ -137,11 +149,35 @@ export function VehicleDetails({
           <div className="lg:col-span-2 space-y-6">
             <div className="aspect-[16/9] rounded-xl overflow-hidden bg-white shadow-sm">
               <ImageWithFallback
-                src={vehicle.imageUrl}
-                alt={`${vehicle.manufacturer} ${vehicle.model}`}
+                src={selectedPhoto?.photoUrl}
+                alt={`${vehicle.manufacturer} ${vehicle.model} ${vehicle.package}`}
                 className="w-full h-full object-cover"
               />
             </div>
+
+            {vehicle.photos && vehicle.photos.length > 1 && (
+              <div className="grid grid-cols-4 sm:grid-cols-6 gap-2">
+                {vehicle.photos.map((photo, index) => (
+                  <button
+                    key={photo.id}
+                    onClick={() => setSelectedImageIndex(index)}
+                    className={`aspect-[4/3] rounded-lg overflow-hidden border-2 transition-colors ${
+                      selectedImageIndex === index
+                        ? "border-blue-500"
+                        : "border-gray-200 hover:border-gray-400"
+                    }`}
+                  >
+                    <ImageWithFallback
+                      src={photo.photoUrl}
+                      alt={`${vehicle.manufacturer} ${vehicle.model} ${
+                        vehicle.package
+                      } ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                  </button>
+                ))}
+              </div>
+            )}
 
             <Card>
               <CardHeader>
@@ -161,7 +197,7 @@ export function VehicleDetails({
                 <div className="flex items-start justify-between mb-4">
                   <div>
                     <h1 className="text-2xl font-bold text-gray-900">
-                      {vehicle.manufacturer} {vehicle.model}
+                      {vehicle.manufacturer} {vehicle.model} {vehicle.package}
                     </h1>
                     <div className="text-3xl font-bold text-blue-600 mt-2">
                       {formatPrice(vehicle.basePriceAmount)}
@@ -172,21 +208,21 @@ export function VehicleDetails({
 
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="space-y-3">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Calendar className="h-4 w-4 text-gray-400" />
                       <span>{vehicle.year}</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Gauge className="h-4 w-4 text-gray-400" />
                       <span>{formatMileage(vehicle.mileage)}</span>
                     </div>
                   </div>
                   <div className="space-y-3">
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Fuel className="h-4 w-4 text-gray-400" />
                       <span>{vehicle.engineType}</span>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
                       <Settings className="h-4 w-4 text-gray-400" />
                       <span>{vehicle.transmissionType}</span>
                     </div>
@@ -201,14 +237,13 @@ export function VehicleDetails({
                     <strong>Color:</strong> {vehicle.color}
                   </div>
                   <div>
-                    <strong>Engine:</strong> {vehicle.engineVolume}L,{" "}
+                    <strong>Engine:</strong> {vehicle.engineVolume}cm³,{" "}
                     {vehicle.power} HP
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Contact Actions */}
             {!showContactForm ? (
               <Card>
                 <CardHeader>

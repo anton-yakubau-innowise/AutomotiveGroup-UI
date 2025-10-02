@@ -246,7 +246,7 @@ export function UserDashboard({
                         {car.year} •{" "}
                         {car.mileage === 0
                           ? "New"
-                          : `${car.mileage.toLocaleString()} mi`}
+                          : `${car.mileage.toLocaleString()} km`}
                       </p>
                     </CardContent>
                     <CardFooter>
