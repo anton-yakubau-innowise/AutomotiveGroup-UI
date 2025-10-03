@@ -10,8 +10,9 @@ import { mockCars } from "./data/mockCars";
 import { Vehicle } from "./features/vehicles/types";
 import { useFavorites } from "./hooks/useFavorites";
 import { Toaster } from "./components/ui/sonner";
+import { ShowroomList } from "./features/showrooms/components/ShowroomList";
 
-type AppView = "catalog" | "vehicle-details" | "dashboard";
+type AppView = "catalog" | "vehicle-details" | "dashboard" | "showrooms";
 
 export default function App() {
   const [currentView, setCurrentView] = useState<AppView>("catalog");
@@ -30,6 +31,10 @@ export default function App() {
 
   const handleShowDashboard = () => {
     setCurrentView("dashboard");
+  };
+
+  const handleShowShowrooms = () => {
+    setCurrentView("showrooms");
   };
 
   const handleBackToCatalogFromDashboard = () => {
@@ -56,6 +61,9 @@ export default function App() {
           />
         );
 
+      case "showrooms":
+        return <ShowroomList onBack={handleBackToCatalog} />;
+
       case "catalog":
       default:
         return (
@@ -73,7 +81,10 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-white">
-      <Header onShowDashboard={handleShowDashboard} />
+      <Header
+        onShowDashboard={handleShowDashboard}
+        onShowShowrooms={handleShowShowrooms}
+      />
       {renderCurrentView()}
       {currentView === "catalog" && <InquiriesPanel />}
       <Toaster />

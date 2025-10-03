@@ -1,3 +1,5 @@
+import { ShowroomSummary } from "@/features/showrooms/types";
+
 export type VehicleStatus = "Available" | "Reserved" | "Sold";
 export type EngineType = "Gasoline" | "Diesel" | "Electric" | "Hybrid";
 export type TransmissionType = "Automatic" | "Manual" | "CVT";
@@ -22,6 +24,7 @@ export interface Vehicle {
   engineVolume: number;
   power: number;
   description: string;
+  showroom: ShowroomSummary;
 
   bodyType: BodyType;
   engineType: EngineType;

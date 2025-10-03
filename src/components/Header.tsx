@@ -25,9 +25,10 @@ import { UserProfile } from "./UserProfile";
 
 interface HeaderProps {
   onShowDashboard?: () => void;
+  onShowShowrooms?: () => void;
 }
 
-export function Header({ onShowDashboard }: HeaderProps) {
+export function Header({ onShowDashboard, onShowShowrooms }: HeaderProps) {
   // --- State Management ---
   // This component manages its own modal states, which is a valid approach.
   const { user, logout } = useAuth();
@@ -55,6 +56,14 @@ export function Header({ onShowDashboard }: HeaderProps) {
 
   const getFullName = (firstName?: string, lastName?: string) => {
     return `${firstName || ""} ${lastName || ""}`.trim() || user?.email;
+  };
+
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    handler?: () => void
+  ) => {
+    e.preventDefault();
+    handler?.();
   };
 
   return (
@@ -90,7 +99,8 @@ export function Header({ onShowDashboard }: HeaderProps) {
                 Services
               </a>
               <a
-                href="#showrooms"
+                href="#"
+                onClick={(e) => handleNavClick(e, onShowShowrooms)}
                 className="text-gray-700 hover:text-gray-900 transition-colors"
               >
                 Showrooms
