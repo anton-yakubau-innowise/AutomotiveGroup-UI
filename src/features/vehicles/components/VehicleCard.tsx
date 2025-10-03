@@ -4,20 +4,25 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
 import { ImageWithFallback } from "@/components/figma/ImageWithFallback";
 import { Calendar, Fuel, Gauge, Settings, MapPin, Heart } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface VehicleCardProps {
   vehicle: Vehicle;
-  onViewDetails: (vehicle: Vehicle) => void;
   onToggleFavorite?: (vehicleId: string) => void;
   isFavorite?: boolean;
 }
 
 export function VehicleCard({
   vehicle,
-  onViewDetails,
   onToggleFavorite,
   isFavorite,
 }: VehicleCardProps) {
+  const navigate = useNavigate();
+
+  const handleViewDetails = () => {
+    navigate(`/vehicles/${vehicle.id}`);
+  };
+
   const primaryPhoto =
     vehicle.photos?.find((p) => p.isPrimary) || vehicle.photos?.[0];
 
@@ -118,7 +123,7 @@ export function VehicleCard({
 
       <CardFooter className="p-4 pt-0">
         <Button
-          onClick={() => onViewDetails(vehicle)}
+          onClick={handleViewDetails}
           className="w-full"
           variant="outline"
         >

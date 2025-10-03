@@ -11,5 +11,14 @@ export const getVehicles = async (): Promise<Vehicle[]> => {
   }
 };
 
-// export const getVehicleById = async (id: string): Promise<Vehicle> => { ... };
+export const getVehicleById = async (id: string): Promise<Vehicle> => {
+  try {
+    const response = await apiClient.get<Vehicle>(`/vehicles/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Failed to fetch vehicle:", error);
+    throw error;
+  }
+};
+
 // export const createVehicle = async (data: CreateVehicleRequest): Promise<Vehicle> => { ... };

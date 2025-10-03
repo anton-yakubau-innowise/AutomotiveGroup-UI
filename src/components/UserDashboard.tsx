@@ -26,7 +26,6 @@ import {
   ArrowLeft,
 } from "lucide-react";
 import { Vehicle as VehicleType } from "@/features/vehicles/types";
-import { mockCars } from "../data/mockCars";
 
 interface UserDashboardProps {
   onBack: () => void;

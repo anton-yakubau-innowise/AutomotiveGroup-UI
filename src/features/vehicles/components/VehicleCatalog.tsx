@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import {
   Vehicle,
   VehicleFilters as VehicleFiltersType,
@@ -17,18 +17,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useFavorites } from "@/hooks/useFavorites";
-import { getVehicles } from "@/features/vehicles/api";
 import { VehicleCardSkeleton } from "./VehicleCardSkeleton";
 
 interface VehicleCatalogProps {
-  onViewDetails: (vehicle: Vehicle) => void;
+  vehicles: Vehicle[];
+  isLoading: boolean;
+  error: string | null;
 }
 
-export function VehicleCatalog({ onViewDetails }: VehicleCatalogProps) {
-  const [allVehicles, setAllVehicles] = useState<Vehicle[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
+export function VehicleCatalog({
+  vehicles: allVehicles,
+  isLoading,
+  error,
+}: VehicleCatalogProps) {
   const [filters, setFilters] = useState<VehicleFiltersType>({});
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -36,24 +37,6 @@ export function VehicleCatalog({ onViewDetails }: VehicleCatalogProps) {
     "price_asc" | "price_desc" | "year_desc" | "mileage_asc"
   >("price_asc");
   const { toggleFavorite, isFavorite } = useFavorites();
-
-  useEffect(() => {
-    const fetchVehicles = async () => {
-      try {
-        setIsLoading(true);
-        setError(null);
-        const data = await getVehicles();
-        setAllVehicles(data);
-      } catch (err) {
-        setError("Failed to load vehicles. Please try again later.");
-        console.error(err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchVehicles();
-  }, []);
 
   const filteredAndSortedVehicles = useMemo(() => {
     let result = allVehicles.filter((vehicle) => {
@@ -156,7 +139,6 @@ export function VehicleCatalog({ onViewDetails }: VehicleCatalogProps) {
             <VehicleCard
               key={vehicle.id}
               vehicle={vehicle}
-              onViewDetails={onViewDetails}
               onToggleFavorite={toggleFavorite}
               isFavorite={isFavorite(vehicle.id)}
             />

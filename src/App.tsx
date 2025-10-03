@@ -1,92 +1,32 @@
-import { useState } from "react";
+import { Routes, Route, useNavigate } from "react-router-dom";
 import { Header } from "./components/Header";
 import { Hero } from "./components/Hero";
 import { VehicleCatalog } from "./features/vehicles/components/VehicleCatalog";
-import { VehicleDetails } from "./features/vehicles/components/VehicleDetails";
-import { InquiriesPanel } from "./components/InquiriesPanel";
-import { FavoritesPanel } from "./components/FavoritesPanel";
 import { UserDashboard } from "./components/UserDashboard";
-import { mockCars } from "./data/mockCars";
-import { Vehicle } from "./features/vehicles/types";
-import { useFavorites } from "./hooks/useFavorites";
 import { Toaster } from "./components/ui/sonner";
 import { ShowroomList } from "./features/showrooms/components/ShowroomList";
-
-type AppView = "catalog" | "vehicle-details" | "dashboard" | "showrooms";
+import { VehicleDetailsRoute } from "./features/vehicles/components/VehicleDetailsRoute";
+import { HomePage } from "./pages/HomePage";
 
 export default function App() {
-  const [currentView, setCurrentView] = useState<AppView>("catalog");
-  const [selectedVehicle, setSelectedVehicle] = useState<Vehicle | null>(null);
-  const { toggleFavorite, isFavorite } = useFavorites();
-
-  const handleViewDetails = (vehicle: Vehicle) => {
-    setSelectedVehicle(vehicle);
-    setCurrentView("vehicle-details");
-  };
-
-  const handleBackToCatalog = () => {
-    setSelectedVehicle(null);
-    setCurrentView("catalog");
-  };
-
-  const handleShowDashboard = () => {
-    setCurrentView("dashboard");
-  };
-
-  const handleShowShowrooms = () => {
-    setCurrentView("showrooms");
-  };
-
-  const handleBackToCatalogFromDashboard = () => {
-    setCurrentView("catalog");
-  };
-
-  const renderCurrentView = () => {
-    switch (currentView) {
-      case "vehicle-details":
-        return selectedVehicle ? (
-          <VehicleDetails
-            vehicle={selectedVehicle}
-            onBack={handleBackToCatalog}
-            onToggleFavorite={toggleFavorite}
-            isFavorite={isFavorite(selectedVehicle.id)}
-          />
-        ) : null;
-
-      case "dashboard":
-        return (
-          <UserDashboard
-            onBack={handleBackToCatalogFromDashboard}
-            onViewCarDetails={handleViewDetails}
-          />
-        );
-
-      case "showrooms":
-        return <ShowroomList onBack={handleBackToCatalog} />;
-
-      case "catalog":
-      default:
-        return (
-          <>
-            <Hero />
-            <VehicleCatalog onViewDetails={handleViewDetails} />
-            <FavoritesPanel
-              vehicles={mockCars}
-              onViewDetails={handleViewDetails}
-            />
-          </>
-        );
-    }
-  };
+  const AboutPage = () => <div className="p-8">About Page Content</div>;
+  const ServicesPage = () => <div className="p-8">Services Page Content</div>;
+  const ContactPage = () => <div className="p-8">Contact Page Content</div>;
 
   return (
     <div className="min-h-screen bg-white">
-      <Header
-        onShowDashboard={handleShowDashboard}
-        onShowShowrooms={handleShowShowrooms}
-      />
-      {renderCurrentView()}
-      {currentView === "catalog" && <InquiriesPanel />}
+      <Header />
+      <main>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/showrooms" element={<ShowroomList />} />
+          <Route path="/dashboard" element={<UserDashboard />} />
+          <Route path="/vehicles/:id" element={<VehicleDetailsRoute />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/services" element={<ServicesPage />} />
+          <Route path="/contact" element={<ContactPage />} />
+        </Routes>
+      </main>
       <Toaster />
     </div>
   );

@@ -1,18 +1,16 @@
 import { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
 import { Showroom } from "../types";
 import { getShowrooms } from "../api";
 import { ShowroomCard } from "./ShowroomCard";
 import { toast } from "sonner";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal } from "lucide-react";
+import { Terminal, ArrowLeft } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
+import { BackButton } from "@/components/ui/backbutton";
 
-interface ShowroomListProps {
-  onBack: () => void;
-}
-
-export function ShowroomList({ onBack }: ShowroomListProps) {
+export function ShowroomList() {
   const [showrooms, setShowrooms] = useState<Showroom[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,9 +56,7 @@ export function ShowroomList({ onBack }: ShowroomListProps) {
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>
-        <Button onClick={onBack} variant="outline" className="mt-4">
-          Back to Catalog
-        </Button>
+        <BackButton className="mt-4" />
       </div>
     );
   }
@@ -68,11 +64,11 @@ export function ShowroomList({ onBack }: ShowroomListProps) {
   return (
     <section id="showrooms" className="bg-white">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="flex justify-between items-center mb-8">
+        <div className="relative mb-8 flex items-center justify-center">
+          <div className="absolute left-0">
+            <BackButton />
+          </div>
           <h2 className="text-3xl font-bold">Our Showrooms</h2>
-          <Button onClick={onBack} variant="outline">
-            Back to Catalog
-          </Button>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {showrooms.map((showroom) => (

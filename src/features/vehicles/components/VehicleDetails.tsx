@@ -21,17 +21,16 @@ import { Textarea } from "@/components/ui/textarea";
 import { useInquiries } from "@/hooks/useInquiries";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
+import { BackButton } from "@/components/ui/backbutton";
 
 interface VehicleDetailsProps {
   vehicle: Vehicle;
-  onBack: () => void;
   onToggleFavorite?: (vehicleId: string) => void;
   isFavorite?: boolean;
 }
 
 export function VehicleDetails({
   vehicle,
-  onBack,
   onToggleFavorite,
   isFavorite,
 }: VehicleDetailsProps) {
@@ -119,14 +118,7 @@ export function VehicleDetails({
     <div className="min-h-screen bg-gray-50">
       <div className="bg-white border-b sticky top-0 z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
-          <Button
-            variant="ghost"
-            onClick={onBack}
-            className="flex items-center gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Catalog
-          </Button>
+          <BackButton />
           {onToggleFavorite && (
             <Button
               variant="outline"

@@ -1,3 +1,4 @@
+import { Link, useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Button } from "./ui/button";
 import {
@@ -23,14 +24,10 @@ import { AuthModal } from "@/features/users/components/AuthModal";
 import { Dialog, DialogContent, DialogTitle } from "./ui/dialog";
 import { UserProfile } from "./UserProfile";
 
-interface HeaderProps {
-  onShowDashboard?: () => void;
-  onShowShowrooms?: () => void;
-}
-
-export function Header({ onShowDashboard, onShowShowrooms }: HeaderProps) {
+export function Header() {
   // --- State Management ---
   // This component manages its own modal states, which is a valid approach.
+  const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showProfileModal, setShowProfileModal] = useState(false);
@@ -40,6 +37,18 @@ export function Header({ onShowDashboard, onShowShowrooms }: HeaderProps) {
   const handleAuthClick = (form: "login" | "register") => {
     setAuthForm(form);
     setShowAuthModal(true);
+  };
+
+  const handleNavClick = (
+    e: React.MouseEvent<HTMLAnchorElement>,
+    handler?: () => void
+  ) => {
+    e.preventDefault();
+    handler?.();
+  };
+
+  const handleShowDashboard = () => {
+    navigate("/dashboard");
   };
 
   // The logout function from our new AuthContext is synchronous,
@@ -58,14 +67,6 @@ export function Header({ onShowDashboard, onShowShowrooms }: HeaderProps) {
     return `${firstName || ""} ${lastName || ""}`.trim() || user?.email;
   };
 
-  const handleNavClick = (
-    e: React.MouseEvent<HTMLAnchorElement>,
-    handler?: () => void
-  ) => {
-    e.preventDefault();
-    handler?.();
-  };
-
   return (
     <>
       <header className="bg-white border-b shadow-sm sticky top-0 z-50">
@@ -74,43 +75,42 @@ export function Header({ onShowDashboard, onShowShowrooms }: HeaderProps) {
             {/* Logo */}
             <div className="flex items-center">
               <h1 className="text-2xl font-bold text-gray-900">
-                Automotive Group
+                <Link to="/">Automotive Group</Link>
               </h1>
             </div>
 
             {/* Navigation */}
             <nav className="hidden md:flex space-x-8">
-              <a
-                href="#catalog"
+              <Link
+                to="/"
                 className="text-gray-700 hover:text-gray-900 transition-colors"
               >
                 Catalog
-              </a>
-              <a
-                href="#about"
+              </Link>
+              <Link
+                to="/about"
                 className="text-gray-700 hover:text-gray-900 transition-colors"
               >
                 About
-              </a>
-              <a
-                href="#services"
+              </Link>
+              <Link
+                to="/services"
                 className="text-gray-700 hover:text-gray-900 transition-colors"
               >
                 Services
-              </a>
-              <a
-                href="#"
-                onClick={(e) => handleNavClick(e, onShowShowrooms)}
+              </Link>
+              <Link
+                to="/showrooms"
                 className="text-gray-700 hover:text-gray-900 transition-colors"
               >
                 Showrooms
-              </a>
-              <a
-                href="#contact"
+              </Link>
+              <Link
+                to="/contact"
                 className="text-gray-700 hover:text-gray-900 transition-colors"
               >
                 Contact
-              </a>
+              </Link>
             </nav>
 
             {/* Actions */}
@@ -160,7 +160,7 @@ export function Header({ onShowDashboard, onShowShowrooms }: HeaderProps) {
                       </div>
                     </div>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={onShowDashboard}>
+                    <DropdownMenuItem onClick={handleShowDashboard}>
                       <LayoutDashboard className="mr-2 h-4 w-4" />
                       <span>Dashboard</span>
                     </DropdownMenuItem>
