@@ -26,8 +26,11 @@ export function VehicleCard({
   const primaryPhoto =
     vehicle.photos?.find((p) => p.isPrimary) || vehicle.photos?.[0];
 
-  const formatPrice = (price: number) => {
-    return "$" + new Intl.NumberFormat("en-US").format(price);
+  const formatPrice = (amount: number, currency: string) => {
+    return new Intl.NumberFormat("pl-PL", {
+      style: "currency",
+      currency: currency,
+    }).format(amount);
   };
 
   const formatMileage = (mileage: number) => {
@@ -96,7 +99,7 @@ export function VehicleCard({
             {vehicle.manufacturer} {vehicle.model}{" "}
           </h3>
           <div className="text-2xl font-bold text-blue-600">
-            {formatPrice(vehicle.basePriceAmount)}{" "}
+            {formatPrice(vehicle.basePriceAmount, vehicle.basePriceCurrency)}{" "}
           </div>
         </div>
 

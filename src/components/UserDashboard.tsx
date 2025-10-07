@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../contexts/AuthContext";
 import { useFavorites } from "../hooks/useFavorites";
-import { useInquiries, VehicleInquiry } from "../hooks/useInquiries";
+import {
+  useInquiries,
+  VehicleInquiry,
+} from "../features/sales/hooks/useInquiries";
 import {
   Card,
   CardContent,

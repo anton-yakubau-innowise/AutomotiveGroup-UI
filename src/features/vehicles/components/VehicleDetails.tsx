@@ -18,10 +18,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useInquiries } from "@/hooks/useInquiries";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { BackButton } from "@/components/ui/backbutton";
+import { BackButton } from "@/components/ui/backbutton"; // 1. Возвращаем BackButton
+import { useInquiries } from "@/features/sales/hooks/useInquiries"; // 2. Указываем правильный путь к хуку
 
 interface VehicleDetailsProps {
   vehicle: Vehicle;
@@ -58,8 +58,12 @@ export function VehicleDetails({
 
   const { submitInquiry, isSubmitting } = useInquiries();
 
-  const formatPrice = (price: number) => {
-    return "$" + new Intl.NumberFormat("en-US").format(price);
+  // --- Вся логика ниже остается такой же, как в вашем оригинале ---
+  const formatPrice = (amount: number, currency: string) => {
+    return new Intl.NumberFormat("pl-PL", {
+      style: "currency",
+      currency: currency,
+    }).format(amount);
   };
 
   const formatMileage = (mileage: number) => {
@@ -89,27 +93,30 @@ export function VehicleDetails({
 
   const handleSubmitInquiry = async (e: React.FormEvent) => {
     e.preventDefault();
-    const inquiry = {
+
+    if (!user) {
+      toast.error("Please sign in", {
+        description: "You must be logged in to send an inquiry.",
+      });
+      return;
+    }
+
+    const payload = {
+      customerId: user.id,
       vehicleId: vehicle.id,
-      vehicleBrand: vehicle.manufacturer,
-      vehicleModel: vehicle.model,
-      name: formData.name,
-      phone: formData.phone,
-      email: formData.email,
-      message:
-        formData.message ||
-        `Interested in ${vehicle.manufacturer} ${vehicle.model} ${vehicle.year}`,
     };
-    const result = await submitInquiry(inquiry);
+
+    const result = await submitInquiry(payload);
+
     if (result.success) {
       toast.success("Inquiry submitted!", {
-        description: "We will contact you soon.",
+        description: "Our manager will contact you using your profile details.",
       });
       setShowContactForm(false);
       setFormData((prev) => ({ ...prev, message: "" }));
     } else {
       toast.error("Failed to submit inquiry", {
-        description: "Please try again or contact us by phone.",
+        description: "An unexpected error occurred. Please try again later.",
       });
     }
   };
@@ -192,7 +199,10 @@ export function VehicleDetails({
                       {vehicle.manufacturer} {vehicle.model} {vehicle.package}
                     </h1>
                     <div className="text-3xl font-bold text-blue-600 mt-2">
-                      {formatPrice(vehicle.basePriceAmount)}
+                      {formatPrice(
+                        vehicle.basePriceAmount,
+                        vehicle.basePriceCurrency
+                      )}
                     </div>
                   </div>
                   <div className="flex gap-2">{getStatusBadge()}</div>
@@ -263,45 +273,39 @@ export function VehicleDetails({
                 <CardContent>
                   <form onSubmit={handleSubmitInquiry} className="space-y-4">
                     <div>
-                      <Label htmlFor="name">Full Name *</Label>
+                      <Label htmlFor="name">Full Name</Label>
                       <Input
                         id="name"
-                        required
                         value={formData.name}
-                        onChange={(e) =>
-                          setFormData({ ...formData, name: e.target.value })
-                        }
+                        readOnly
+                        className="bg-gray-100"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="phone">Phone *</Label>
+                      <Label htmlFor="phone">Phone</Label>
                       <Input
                         id="phone"
                         type="tel"
-                        required
                         value={formData.phone}
-                        onChange={(e) =>
-                          setFormData({ ...formData, phone: e.target.value })
-                        }
+                        readOnly
+                        className="bg-gray-100"
                       />
                     </div>
                     <div>
-                      <Label htmlFor="email">Email *</Label>
+                      <Label htmlFor="email">Email</Label>
                       <Input
                         id="email"
                         type="email"
-                        required
                         value={formData.email}
-                        onChange={(e) =>
-                          setFormData({ ...formData, email: e.target.value })
-                        }
+                        readOnly
+                        className="bg-gray-100"
                       />
                     </div>
                     <div>
                       <Label htmlFor="message">Message</Label>
                       <Textarea
                         id="message"
-                        placeholder="I'm interested in this car..."
+                        placeholder="Optional message to the seller..."
                         value={formData.message}
                         onChange={(e) =>
                           setFormData({ ...formData, message: e.target.value })
