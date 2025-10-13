@@ -26,20 +26,17 @@ export function AuthModal({
   );
   const { clearError } = useAuth();
 
-  // This hook ensures the form always opens in the correct state
   useEffect(() => {
     if (isOpen) {
       setCurrentForm(defaultForm);
     }
   }, [isOpen, defaultForm]);
 
-  // This function is called when the user clicks the "Sign up" or "Sign in" link
   const handleToggleForm = () => {
     clearError();
     setCurrentForm(currentForm === "login" ? "register" : "login");
   };
 
-  // This function is called when the dialog's open state changes (e.g., user clicks the 'X' or outside)
   const handleOpenChange = (open: boolean) => {
     if (!open) {
       clearError();
@@ -48,7 +45,6 @@ export function AuthModal({
   };
 
   return (
-    // Use our new handler for the onOpenChange event
     <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>

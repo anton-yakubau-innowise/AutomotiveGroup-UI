@@ -92,7 +92,6 @@ export function RegisterForm({ onToggleForm, onClose }: RegisterFormProps) {
       </CardHeader>
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
-          {/* Using two separate fields for name */}
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="firstName">First Name</Label>
@@ -147,7 +146,6 @@ export function RegisterForm({ onToggleForm, onClose }: RegisterFormProps) {
             )}
           </div>
 
-          {/* Phone number field added here */}
           <div className="space-y-2">
             <Label htmlFor="phoneNumber">Phone Number (Optional)</Label>
             <Input

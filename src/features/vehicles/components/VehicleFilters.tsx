@@ -81,7 +81,6 @@ export function VehicleFilters({
         )}
       </div>
 
-      {/* Filters Panel */}
       <div className={`${isOpen ? "block" : "hidden"} lg:block`}>
         <Card>
           <CardHeader className="pb-4">
@@ -101,7 +100,6 @@ export function VehicleFilters({
             </div>
           </CardHeader>
           <CardContent className="space-y-6">
-            {/* Brand */}
             <div>
               <Label>Brand</Label>
               <Select
@@ -123,7 +121,6 @@ export function VehicleFilters({
               </Select>
             </div>
 
-            {/* Price Range */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Price from ($)</Label>
@@ -155,7 +152,6 @@ export function VehicleFilters({
               </div>
             </div>
 
-            {/* Year Range */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Year from</Label>
@@ -187,7 +183,6 @@ export function VehicleFilters({
               </div>
             </div>
 
-            {/* Fuel Type */}
             <div>
               <Label>Fuel Type</Label>
               <Select
@@ -209,7 +204,6 @@ export function VehicleFilters({
               </Select>
             </div>
 
-            {/* Transmission */}
             <div>
               <Label>Transmission</Label>
               <Select
@@ -231,7 +225,6 @@ export function VehicleFilters({
               </Select>
             </div>
 
-            {/* Body Type */}
             <div>
               <Label>Body Type</Label>
               <Select
@@ -253,7 +246,6 @@ export function VehicleFilters({
               </Select>
             </div>
 
-            {/* Mileage Range */}
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Mileage from (miles)</Label>

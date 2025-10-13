@@ -21,4 +21,4 @@ export const getVehicleById = async (id: string): Promise<Vehicle> => {
   }
 };
 
-// export const createVehicle = async (data: CreateVehicleRequest): Promise<Vehicle> => { ... };
+// export const createVehicle = async (data: CreateVehicleRequest): Promise<Vehicle> => { };

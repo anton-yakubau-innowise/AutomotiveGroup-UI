@@ -23,7 +23,6 @@ interface LoginFormProps {
   onClose: () => void;
 }
 
-// Step 1: Define the validation schema with Zod
 const loginSchema = z.object({
   loginIdentifier: z
     .string()
@@ -37,7 +36,6 @@ export function LoginForm({ onToggleForm, onClose }: LoginFormProps) {
   const [showPassword, setShowPassword] = useState(false);
   const { login, isLoading, error } = useAuth();
 
-  // Step 2: Initialize react-hook-form with our validation schema
   const {
     register,
     handleSubmit,
@@ -50,7 +48,6 @@ export function LoginForm({ onToggleForm, onClose }: LoginFormProps) {
     },
   });
 
-  // Step 3: Create a handler that receives only valid data
   const onSubmit = async (data: LoginFormData) => {
     console.log("Data received by onSubmit:", JSON.stringify(data));
 
@@ -87,12 +84,10 @@ export function LoginForm({ onToggleForm, onClose }: LoginFormProps) {
           Sign in to your account to access favorites and inquiries
         </CardDescription>
       </CardHeader>
-      {/* Step 4: Wrap our handler call in handleSubmit */}
       <form onSubmit={handleSubmit(onSubmit)}>
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="loginIdentifier">Username or Email</Label>
-            {/* Step 5: Register the input under the name 'loginIdentifier' */}
             <Input
               id="loginIdentifier"
               type="text"
@@ -132,7 +127,6 @@ export function LoginForm({ onToggleForm, onClose }: LoginFormProps) {
               <p className="text-sm text-red-500">{errors.password.message}</p>
             )}
           </div>
-          {/* Display general server error */}
           {error && <p className="text-sm text-red-500">{error}</p>}
         </CardContent>
         <CardFooter className="flex flex-col space-y-4 mt-6">
