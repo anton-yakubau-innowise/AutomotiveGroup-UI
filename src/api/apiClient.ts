@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const API_GATEWAY_URL =
-  "https://ocelotapigateway.lemonsmoke-f2c9c75c.northeurope.azurecontainerapps.io/";
+  "https://ocelotapigateway.lemonsmoke-f2c9c75c.northeurope.azurecontainerapps.io/gateway";
 
 const apiClient = axios.create({
   baseURL: API_GATEWAY_URL,
