@@ -2,35 +2,20 @@
 
 # \--- Этап 1: Образ для разработки (с Hot Reload) ---
 
-# Используем официальный образ Node.js. 'alpine' - это легковесная версия.
 
 FROM node:20-alpine AS development
 
-# Устанавливаем рабочую директорию внутри контейнера
 
 WORKDIR /app
 
-# Копируем package.json и package-lock.json (если есть) для установки зависимостей.
-
-# Этот слой кэшируется, чтобы не переустанавливать всё при каждом изменении кода.
-
 COPY package\*.json ./
-
-# Устанавливаем все зависимости проекта
 
 RUN npm install
 
-# Копируем остальной исходный код
-
 COPY . .
-
-# Открываем стандартный порт, который использует Vite
 
 EXPOSE 5173
 
-# Команда по умолчанию для запуска сервера разработки Vite.
-
-# Флаг --host позволяет подключаться к нему извне контейнера.
 
 CMD ["npm", "run", "dev", "--", "--host"]
 
@@ -43,21 +28,17 @@ COPY package\*.json ./
 RUN npm install
 COPY . .
 
-# Собираем оптимизированные статические файлы для продакшена
-
 RUN npm run build
 
 # \--- Этап 3: Финальный образ с Nginx для продакшена ---
 
-# Используем очень легковесный веб-сервер для раздачи статических файлов
-
 FROM nginx:stable-alpine
 
-# Копируем собранные файлы из этапа "builder" в папку веб-сервера Nginx
+RUN rm /etc/nginx/conf.d/default.conf
+
+COPY nginx.conf /etc/nginx/conf.d/default.conf
 
 COPY --from=builder /app/build /usr/share/nginx/html
-
-# Открываем стандартный порт HTTP
 
 EXPOSE 80
 

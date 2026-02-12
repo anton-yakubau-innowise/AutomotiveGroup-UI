@@ -99,7 +99,10 @@ export function VehicleCard({
             {vehicle.manufacturer} {vehicle.model}{" "}
           </h3>
           <div className="text-2xl font-bold text-blue-600">
-            {formatPrice(vehicle.basePriceAmount, vehicle.basePriceCurrency)}{" "}
+            {formatPrice(
+              vehicle.basePriceAmount,
+              vehicle.basePriceCurrency,
+            )}{" "}
           </div>
         </div>
 

@@ -20,8 +20,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { useAuth } from "@/contexts/AuthContext";
-import { BackButton } from "@/components/ui/backbutton"; // 1. Возвращаем BackButton
-import { useInquiries } from "@/features/sales/hooks/useInquiries"; // 2. Указываем правильный путь к хуку
+import { BackButton } from "@/components/ui/backbutton";
+import { useInquiries } from "@/features/sales/hooks/useInquiries";
 
 interface VehicleDetailsProps {
   vehicle: Vehicle;
@@ -58,7 +58,6 @@ export function VehicleDetails({
 
   const { submitInquiry, isSubmitting } = useInquiries();
 
-  // --- Вся логика ниже остается такой же, как в вашем оригинале ---
   const formatPrice = (amount: number, currency: string) => {
     return new Intl.NumberFormat("pl-PL", {
       style: "currency",
@@ -201,7 +200,7 @@ export function VehicleDetails({
                     <div className="text-3xl font-bold text-blue-600 mt-2">
                       {formatPrice(
                         vehicle.basePriceAmount,
-                        vehicle.basePriceCurrency
+                        vehicle.basePriceCurrency,
                       )}
                     </div>
                   </div>
